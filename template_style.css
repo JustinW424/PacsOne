@@ -1,0 +1,497 @@
+/*
+ * template_style.css
+ *
+ * Cascading Style Sheet for displaying PacsOne Server web pages
+ *
+ * CopyRight (c) 2004 Xiaohui Li
+*/
+
+A.negative {
+	color : Red;
+}
+.smallintraday {
+	font-weight : bold;
+	font-style : italic;
+	font-size : 12px;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.smallintradayComment {
+	color : #0000CC;
+	font-size : 12px;
+}
+.relatedLinks {
+	background-color : #8DAD8D;
+	color : White;
+	font-weight : bold;
+	font-size : 12px;
+	font-family : Arial, Helvetica, sans-serif;
+}
+.indexTitle {
+	background-color : #CCCCCC;
+	font-size : 12px;
+	font-weight : bold;
+	font-family : Arial, Helvetica, sans-serif;
+}
+.indexAsOf {
+	font-weight : normal;
+	font-size : 11px;
+}
+.indexName {
+	font-weight : bold;
+	font-size : 11px;
+	color : Black;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.indexHead {
+	font-weight : bold;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.index {
+	font-size : 11px;
+}
+.smallerData {
+	font-size : 11px;
+}
+.deemphasized {
+	font-size : 11px;
+	color : #999999;
+}
+TD {
+	font-family : Arial, Helvetica, sans-serif;
+	font-size : 13px;
+}
+TD.border {
+	background-color : #F0F0F0;
+}
+TD.notes {
+    width : 20%;
+    font-size : 11px;
+}
+TR.content {
+	background-color : White;
+}
+A.toc {
+	color : Black;
+}
+A.small {
+	font-size : 11px;
+}
+.breadcrumbTop {
+	color : #336666;
+	font-size : 12px;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.accountTypeHeader {
+	font-size : 12px;
+	font-weight : bold;
+	color : Black;
+	background-color : #F0F0F0;
+	line-height : 16px;
+}
+.breadcrumbLine {
+	background-color : #006666;
+	font-size : 1pt;
+}
+
+.breadcrumb1 {
+	font-size : 12px;
+	font-weight : bold;
+	font-family : Arial, Helvetica, sans-serif;
+}
+.breadcrumbSmall {
+	font: 100 10px Verdana,Arial,Helvetica; 
+	color: #000000;
+}
+.tocHeader {
+	font-size : 12px;
+	font-weight : bold;
+	color : White;
+	background-color : #8DAD8D;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.unownedHeader {
+	background-color : #666666;
+	color : White;
+	font-size : 11px;
+	font-weight : bold;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.breadcrumbArrow {
+	font-size : 9px;
+	font-weight : bolder;
+}
+.spacer {
+	font-size : 1pt;
+	line-height : 1pt;
+}
+.tocSelected {
+	font-size : 12px;
+	font-weight : bold;
+	background-color : White;
+}
+.tocSelectedBullet {
+	background-color : White;
+}
+.account {
+	font-weight : bold;
+}
+
+.headerBar {
+	background-color : #666666;
+	color : White;
+	font-size : 10.5px;
+	font-weight : bold;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+.headerDate {
+	background-color : #666666;
+	color : White;
+	font-size : 12px;
+}
+.secondaryHeader {
+	background-color : #EEEEEE;
+	font-size : 12px;
+}
+.subHeader {
+	font-weight : bold;
+	background-color : #EEEEEE;
+}
+
+.blockTotal {
+	background-color : #F0F0F0;
+	font-weight : bold;
+}
+
+A {
+	color : #0909A3;
+}
+
+.note {
+	font-size : 11px;
+}
+.noteAst {
+	font-size : 11px;
+	font-style : italic;
+}
+.hiddenAccount {
+	font-size : 11px; 
+	color : #CCCCCC
+}
+
+.negativeNumber {
+	color : Red;
+}
+
+.positiveNumber {
+	color : Green;
+}
+
+
+.qaIdentifier {
+	color : White;
+	font-size : 11px;
+	background-color : White;
+	line-height : 1px;
+}
+.topLine {
+	background-color : #CC9900;
+	line-height: 1pt;
+	font-size : 1pt;
+}
+.pageName {
+	color : Black;
+	font-size : 16px;
+	font-weight : bold;
+}
+.updatedItem{
+		font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+		font-size: small;
+		font-style: italic;
+		font-weight: bold;	
+}
+.smallerBoldData{
+	font-size: 11px;
+	font-weight: bold;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.intraday {
+	font-weight : bold;
+	font-style : italic;
+}
+
+.intradayComment {
+	color : #0000CC;
+}
+.smallHeaderDate {
+	background-color : #666666;
+	color : White;
+	font-size : 11px;
+	font-family : "MS Sans Serif", Geneva, sans-serif;
+}
+.smallHeaderBar {
+	background-color : #666666;
+	color : White;
+	font-size : 11px;
+	font-weight : bold;
+	font-family: "MS Sans Serif", Geneva, sans-serif;
+}
+.headerText {
+color : White;
+}   
+.historyHeader {
+	background-color : #EEEEEE;
+	font-size : 10.5px;
+}
+.topLinks {
+	font-size : 12px;
+}
+.greyLine  				{font-size: 1pt; line-height: 1pt;	background-color : #EEEEEE;}
+.clearLine  {
+	font-size : 1pt;
+	background-color : #FFFFFF;
+}
+.blackLine				{font-size : 1pt; line-height: 1pt;	background-color : #999999;}
+.headerBar2 {
+	background-color : #cccccc;
+	font-size : 10.5px;
+	font-weight : bold;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.blueLine				{font-size : 1pt; line-height: 1pt;	background-color : #000080;}
+.FullViewLinks {
+	background-color : #000080;
+	color : White;
+	font-weight : bold;
+	font-size : 12px;
+	font-family : Arial, Helvetica, sans-serif;
+}
+.FullViewContent {
+	background-color : #F0F0F0;
+	font-size : 11px;
+}
+.FullViewSpacer {
+	font-size : 1pt;
+	background-color : #F0F0F0;
+}
+.bodyf {
+ font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+ font-size : 11px;
+ color : #000000;
+}
+.smallerDataNegative {
+	font-size : 11px;
+	color : red;
+}
+.subHeaderNegative {
+	font-weight : bold;
+	background-color : #EEEEEE;
+	color : red;
+}
+.level1 {
+        color:  #006666; 
+		font-size : 13px;
+		font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+.brokerageIntraday{	font-weight:bold;
+}
+.TabSelected {
+	background-color : #FFA07A;
+	color : Black;
+	font-size : 12px;
+	font-weight:bold;
+}
+.TabNotSelected {
+	background-color : #666699;
+}
+.TabNotSelectedText {
+	color : White;
+	font-size : 12px;
+	font-weight:bold;
+}
+.RequiredField {
+	background-color : #d6deec;
+}
+tr.evenrows {
+	background-color : #e6eefc;
+	color : Black;
+}
+tr.oddrows {
+	background-color : #d6deec;
+	color : Black;
+}
+tr.listhead {
+	font-weight:bold;
+}
+tr.RowHighlight {
+    background-color : #FFFF66;
+}
+tr.RowHighlightSelected {
+    background-color : #00eeff;
+}
+tr.RowSelected {
+    background-color : #00eeff;
+}
+.StudyReviewed {
+	background-color : white;
+	color : Black;
+}
+tr.StudyReviewedHighlight {
+    background-color : #FFFF66;
+}
+tr.StudyReviewedHighlightSelected {
+    background-color : #FFFF66;
+}
+tr.StudyReviewedSelected {
+    background-color : white;
+}
+.StudyNotReviewed {
+	background-color : #d6deec;
+	color : Black;
+}
+tr.StudyNotReviewedHighlight {
+    background-color : #FFFF66;
+}
+tr.StudyNotReviewedHighlightSelected {
+    background-color : #FFFF66;
+}
+tr.StudyNotReviewedSelected {
+    background-color : #d6deec;
+}
+.StudyVerified {
+	background-color : #99FF99;
+	color : Black;
+}
+tr.StudyVerifiedHighlight {
+    background-color : #CCFF66;
+}
+tr.StudyVerifiedHighlightSelected {
+    background-color : #CCFF66;
+}
+tr.StudyVerifiedSelected {
+    background-color : #99FF99;
+}
+.StudyNeedVerification {
+	background-color : #FF6699;
+	color : Black;
+}
+tr.StudyNeedVerificationHighlight {
+    background-color : #FF9966;
+}
+tr.StudyNeedVerificationHighlightSelected {
+    background-color : #FF9966;
+}
+tr.StudyNeedVerificationSelected {
+    background-color : #FF6699;
+}
+tr.oddrowsHighlight {
+    background-color : #FFFF66;
+}
+tr.oddrowsHighlightSelected {
+    background-color : #FFFF66;
+}
+tr.oddrowsSelected {
+    background-color : #d6deec;
+}
+tr.evenrowsHighlight {
+    background-color : #FFFF66;
+}
+tr.evenrowsHighlightSelected {
+    background-color : #FFFF66;
+}
+tr.evenrowsSelected {
+    background-color : #e6eefc;
+}
+
+.Text					{font: 100 13px Arial,Helvetica;}
+.Header					{font: 700 13px Arial,Helvetica;}
+.SmallText				{font: 100 11px Arial,Helvetica;}
+.SmallTextHeader		{font: 700 12px Arial,Helvetica;}
+.TextTableTitle			{font: 700 11px Verdana; background:#666666; color:white;}
+.ArticleHeader			{font: 700 15px Arial,Helvetica; color:#666666;}
+.Data					{font: 100 12px Verdana,Arial,Helvetica;}
+.DataHeader				{font: 700 12px Verdana,Arial,Helvetica;}
+.SmallData				{font: 100 11px Verdana,Arial,Helvetica;}
+.SmallDataHeader		{font: 700 11px Verdana,Arial,Helvetica;}
+.SmallestData			{font: 100 10px Verdana,Arial,Helvetica;}
+.SmallestDataHeader		{font: 700 10px Verdana,Arial,Helvetica;}
+.DataTableBorder		{border: 1px; background: #CCCCCC;}
+.DataHeaderBackground	{font: 700 12px Verdana,Arial,Helvetica; background: #666666;}
+.DataTableTitle			{font: 700 12px Verdana,Arial,Helvetica; background: #666666; color: white;}
+.TOCbg					{background-color:#e3e9e3;layer-background-color:#e3e9e3;}
+.TOCLink				{font: 100 13px Arial,Helvetica; color: #000000;}
+.TOCSectionHeader		{font: 700 12px Verdana,Arial,Helvetica; background: #8DA98D; color: white;}
+.TOCSubSectionHeader	{font: 700 12px Verdana,Arial,Helvetica; color: #336666;}
+.TOCSelected			{font: 700 12px Arial; background:white;}
+.TOCLev3SectionHeader	{font: 700 11px Verdana,Arial,Helvetica; background: #C6D7C6; color: black;}
+.TOCThirdLevel			{font: 100 11px Verdana,Arial,Helvetica;}
+.TOCThirdLevelSelected	{font: 700 11px Verdana,Arial,Helvetica;}
+.TOCLabel1				{font: 700 12px Verdana,Arial,Helvetica; color: #336666;}
+.TOCLabel2				{font: 100 11px Verdana,Arial,Helvetica; color: black;}
+.SidebarTitle			{font: 700 12px Arial,Helvetica; color:white;}
+.SidebarLink  			{font: 100 12px Arial,Helvetica;}
+.PageTitle				{font: 700 16px Arial,Helvetica;}
+.Breadcrumb				{font: 100 10px Verdana,Arial,Helvetica; color:#666666;}
+.BreadcrumbTopLevel		{font: 100 12px Verdana,Arial,Helvetica; color:#336666;}
+.BreadcrumbSecondLevel	{font: 100 12px Arial,Helvetica; color:#000000;}
+.BreadcrumbSelected		{font: 700 12px Arial,Helvetica;}
+.Footnote				{font: 100 11px Arial,Helvetica;}
+.TabText	  {font: 700 13px Verdana,Helvetica;color:white;}
+.TabTextSelected  {font: 700 13px Verdana,Helvetica;color:black;}
+.bullet					{color:#cc9900;}
+
+BODY					{color: black;background-color:white;layer-background-color:white;}
+A						{color: #333399;}
+SUP						{font: 100 10px Verdana,Arial,Helvetica; color: #333333; vertical-align: super;}
+
+
+.DataTableBorder2  				{font-size: 1pt; line-height: 1pt;	background-color : #CCCCCC;}
+.DataHeaderGrey				{font: 700 12px Verdana,Arial,Helvetica;  background:#f0f0f0;}
+TH						{font: 100 13px Helvetica, sans-serif;}
+
+.DataTableTitleDate 	{font: 12px Verdana,Arial,Helvetica; background: #666666; color: white;}
+.SmallerDataTableTitle 	{font: 11px Verdana,Arial,Helvetica; background: #666666; color: white;}
+.white			{color: white;}	
+.BgWhite			{background-color: #FFFFFF;}
+.BgLightGrey		{background-color: #F0F0F0;}
+.smallTextNegative		{font: 100 11px Arial,Helvetica;color: red;}
+.DataTableTitleDate		{font: 100 12px Arial,Helvetica; background: #666666; color: white;}
+.deemphasizedBold		{font: 700 11px Verdana,Arial,Helvetica; color: #999999;}
+
+.rounded-tab
+{
+    left:0;z-index:100;font-family:Arial,Tahoma;font-size:100%;
+}
+.rounded-tab a
+{
+    color:#0F57C2;background:url(parts.png) left -1750px no-repeat;padding:0 0 0 8px;font-weight:bold;display:block;float:left;text-align:center;cursor:hand;font-size:100%;
+    text-decoration: none;
+}
+.rounded-tab a span
+{
+    background:url(parts.png) right -1750px no-repeat;padding:3px 9px 2px 1px;display:block;float:left;text-align:center;
+}
+.rounded-tab ul
+{
+    list-style:none;padding:0;margin:0;
+}
+.rounded-tab li
+{
+    float:left;margin:0 2px -4px 0;background-color:#FFA07A;border-bottom:solid 1px #BBB!important;
+}
+.rounded-tab li.selected
+{
+    color:#408800;font-family:arial,sans-serif;height:19px;background-color:#fff;border-bottom:solid 1px #FFF!important;z-index:100;position:relative;top:0;
+}
+.rounded-tab li.selected a
+{
+    color:#FFA07A;padding-bottom:1px;font-size:100%;text-decoration:none!important;background:url(parts.png) left -2700px no-repeat;
+}
+.rounded-tab li.selected a span
+{
+    background:url(parts.png) right -2700px no-repeat;
+}
+.tabbed-box
+{
+    position:relative;clear:both;border:solid 1px #BBB;padding:15px 10px 20px 10px;top:3px;
+}
