@@ -65,6 +65,7 @@ function transcribe(&$dbcon, &$uid, &$name, &$template)
     return $output;
 }
 
+
 if (isset($_REQUEST['uid']))
     $uid = $_REQUEST['uid'];
 else
@@ -585,7 +586,114 @@ function addEntryForm(&$username, &$patientId, &$uid)
     print "</title></head>\n";
     print "<body>\n";
     require_once 'header.php';
-    print "<table width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<table class=\"table table-bordered\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<tr valign=top>";
+    print "<td width=\"20%\">";
+    displayStudyInfo($patientId, $uid);
+    print "</td>";
+    //print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
+    
+    print "<td>";
+    // Add Study Note form
+    print "<table class=\"table\" border=0 cellpadding=2 cellspacing=5>\n";
+    print "<form onSubmit='return checkHeadline(this.headline);' method='POST' action='studyNotes.php' enctype='multipart/form-data'>\n";
+    print "<input type='hidden' name='studynoteaction'>\n";
+    print "<input type=hidden name='MAX_FILE_SIZE' value=$maxupload>\n";
+    print "<input type=hidden name='uid' value='$uid'>\n";
+    print "<input type=hidden name='class' value='study'>\n";
+    print "<tr><td width=\"20%\">";
+    print pacsone_gettext("Enter Subject Headline (up to 64 characters):") . "</td>\n";
+    $value = isset($_POST['headline'])? $_POST['headline'] : "";
+    print "<td><input type='text' class=\"form-control\" size=64 maxlength=64 name='headline' value='$value'></td></tr>\n";
+    print "<tr><td>";
+    print pacsone_gettext("Enter Detailed Notes About This Study:") . "</td>\n";
+    $value = isset($_POST['notes'])? $_POST['notes'] : "";
+    print "<td><textarea class=\"form-control\" rows=8 cols=64 name='notes' wrap=virtual>$value</textarea></td></tr>\n";
+    print "<tr><td>";
+    print pacsone_gettext("Attachment:");
+    print "</td>";
+    print "<td><input class=\"btn btn-primary\" type=file name='attachfile' size=64 $disabled><br>\n";
+    print pacsone_gettext("(The following file types can be attached)");
+    print "<br><b>";
+    foreach ($MIME_TBL as $ext => $mimetype) {
+        print " .$ext";
+    }
+    print "</b><p>";
+    $mbytes = $maxupload / 1024 / 1024;
+    print "<input class=\"btn btn-primary\" type=submit name='action' value='";
+    print pacsone_gettext("Attach");
+    print "' onclick='switchText(this.form,\"studynoteaction\",\"Attach\")' $disabled> ";
+    printf(pacsone_gettext("(max %d Mbytes)"), $mbytes) . "<br>\n";
+    // display any attachments here
+    if (isset($_SESSION['attachments'])) {
+        $attachments = $_SESSION['attachments'];
+        if (count($attachments)) {
+            $pdf = false;
+            print "<br>";
+            foreach ($attachments as $att) {
+                $value = $att['name'];
+                if (strcasecmp(substr($value, -4), ".pdf") == 0)
+                    $pdf = true;
+                print "<input type=checkbox name='unattach[]' value='$value'>";
+                print "<img src='attachment.gif' border=0>";
+                print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
+            }
+            print "<br><input type=submit name='action' value='";
+            print pacsone_gettext("Unattach");
+            print "' onclick='switchText(this.form,\"studynoteaction\",\"Unattach\")'>\n";
+            if ($pdf) {
+                print "<p><input type=checkbox name='pdf2dcm'>";
+                print pacsone_gettext("Convert PDF to Dicom Encapsulated Document object");
+            }
+        }
+    }
+    print "</td></tr>\n";
+    // check if any transcrition template defined for this study
+    $query = "select xscript from applentity inner join study on applentity.title=study.sourceae where study.uuid=? and xscript is not null";
+    $bindList = array($uid);
+    $result = $dbcon->preparedStmt($query, $bindList);
+    if ($result && $template = $result->fetchColumn()) {
+        print "<tr><td>";
+        print "<input type='hidden' name='xstemplate' value=\"$template\">";
+        print pacsone_gettext("Transcription Template:");
+        print "</td>";
+        print "<td>" . sprintf(pacsone_gettext("Transcription template: <u>%s</u> is pre-defined for this study"), $template);
+        print "&nbsp;<input type=submit name='action' value='";
+        print pacsone_gettext("Download") . "' title='";
+        print pacsone_gettext("Download Pre-defined Transcription Template");
+        print "' onclick='switchText(this.form,\"studynoteaction\",\"Xscript\")'>\n";
+        print "</td></tr>\n";
+    }
+    print "<tr><td colspan=2>&nbsp;</td></tr>\n";
+    print "<tr><td><input class=\"btn btn-primary\" type='submit' name='action' value='";
+    print pacsone_gettext("Add");
+    print "' onclick='switchText(this.form,\"studynoteaction\",\"Add\")'></td></tr>\n";
+    print "</form></table>\n";
+    print "</td></tr>";
+    print "</table>";
+    require_once 'footer.php';
+    print "</body>\n";
+    print "</html>\n";
+
+    /*
+    include_once 'checkInput.js';
+    include_once 'checkUncheck.js';
+    global $PRODUCT;
+    global $BGCOLOR;
+    global $MIME_TBL;
+    global $dbcon;
+    $result = $dbcon->query("select maxupload from config");
+    $max = $result->fetchColumn();
+    $maxupload = $max * 1024 * 1024;
+    $disabled = $dbcon->hasaccess("upload", $username)? "" : "disabled";
+    // display Add Study Notes form
+    print "<html>\n";
+    print "<head><title>$PRODUCT - ";
+    print pacsone_gettext("Add Study Note");
+    print "</title></head>\n";
+    print "<body>\n";
+    require_once 'header.php';
+    print "<table class=\"table\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
     print "<tr valign=top>";
     print "<td class=notes>";
     displayStudyInfo($patientId, $uid);
@@ -672,6 +780,7 @@ function addEntryForm(&$username, &$patientId, &$uid)
     require_once 'footer.php';
     print "</body>\n";
     print "</html>\n";
+    */
 }
 
 function modifyEntryForm(&$username, &$patientId, &$uid)
@@ -693,7 +802,148 @@ function modifyEntryForm(&$username, &$patientId, &$uid)
     print "</title></head>\n";
     print "<body>\n";
     require_once 'header.php';
-    print "<table width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<table class=\"table table-bordered\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<tr valign=top>";
+    print "<td width=\"20%\">";
+    displayStudyInfo($patientId, $uid);
+    print "</td>";
+    //print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
+
+    print "<td>";
+    $headline = "";
+    $notes = "";
+    $noteid = $_REQUEST['id'];
+    if (!is_numeric($noteid)) {
+        $error = pacsone_gettext("Invalid Note ID");
+        print "<h2><font color=red>$error</font></h2>";
+        exit();
+    }
+    $query = "select headline,notes from studynotes where id=?";
+    $bindList = array($noteid);
+    $result = $dbcon->preparedStmt($query, $bindList);
+    if ($result && ($row = $result->fetch(PDO::FETCH_NUM))) {
+        $headline = $row[0];
+        $notes = $row[1];
+    }
+    // Modify Study Note form
+    print "<table class=\"table\" border=0 cellpadding=2 cellspacing=5>\n";
+    print "<form onSubmit='return checkHeadline(this.headline);' method='POST' action='studyNotes.php' enctype='multipart/form-data'>\n";
+    print "<input type='hidden' name='studynoteaction'>\n";
+    print "<input type=hidden name='MAX_FILE_SIZE' value=$maxupload>\n";
+    print "<input type=hidden name='uid' value='$uid'>\n";
+    print "<input type=hidden name='id' value='$noteid'>\n";
+    print "<input type=hidden name='modify' value=1>\n";
+    print "<tr><td width=\"20%\">";
+    print pacsone_gettext("Enter Subject Headline (up to 64 characters):") . "</td>\n";
+    print "<td><input type='text' class=\"form-control\" size=64 maxlength=64 name='headline' value='$headline'></td></tr>\n";
+    print "<tr><td>";
+    print pacsone_gettext("Enter Detailed Notes About This Study:") . "</td>\n";
+    print "<td><textarea class=\"form-control\" rows=8 cols=64 name='notes' wrap=virtual>$notes</textarea></td></tr>\n";
+    print "<tr><td>";
+    print pacsone_gettext("Attachment:");
+    print "</td>";
+    print "<td>";
+    // list existing attachments
+    $query = "select * from attachment where uuid=? and id=?";
+    $bindList = array($uid, $noteid);
+    $result = $dbcon->preparedStmt($query, $bindList);
+    if ($result && $result->rowCount()) {
+        print "<br>";
+        $count = 0;
+        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            $seq = $row['seq'];
+            $name = basename($row['path']);
+            $size = file_exists($row['path'])? filesize($row['path']) : $row['totalsize'];
+            print "<input type='checkbox' name='seq[]' value=$seq></input>";
+            print "<img src='attachment.gif' border=0>";
+            print "<b>$name</b> ";
+            printf(pacsone_gettext("(%d bytes)"), $size);
+            print "<br>";
+            $count++;
+        }
+        if ($count) {
+            print "<input class=\"btn btn-primary\" type='submit' name='action' value='";
+            print pacsone_gettext("Delete");
+            print "' onclick='switchText(this.form,\"studynoteaction\",\"DeleteAttachment\")'></input>";
+            print "<p>";
+        }
+    }
+    // add any new attachments
+    print "<br><input class=\"btn btn-primary\" type=file name='attachfile' size=64 $disabled><br>\n";
+    print pacsone_gettext("(The following file types can be attached)");
+    print "<br><b>";
+    foreach ($MIME_TBL as $ext => $mimetype) {
+        print " .$ext";
+    }
+    print "</b><p>";
+    $mbytes = $maxupload / 1024 / 1024;
+    print "<input class=\"btn btn-primary\" type=submit name='action' value='";
+    print pacsone_gettext("Attach");
+    print "' onclick='switchText(this.form,\"studynoteaction\",\"Attach\")' $disabled> ";
+    printf(pacsone_gettext("(max %d Mb)"), $mbytes) . "<br>\n";
+    $attachments = array();
+    if (isset($_SESSION['attachments'])) {
+        $attachments = $_SESSION['attachments'];
+    }
+    if (count($attachments)) {
+        print "<br>";
+        foreach ($attachments as $att) {
+            $value = $att['name'];
+            print "<input type=checkbox name='unattach[]' value='$value'>";
+            print "<img src='attachment.gif' border=0>";
+            print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
+        }
+        print "<br><input type=submit name='action' value='";
+        print pacsone_gettext("Unattach");
+        print "' onclick='switchText(this.form,\"studynoteaction\",\"Unattach\")'>\n";
+    }
+    print "</td></tr>\n";
+    // check if any transcrition template defined for this study
+    $query = "select xscript from applentity inner join study on applentity.title=study.sourceae where study.uuid=? and xscript is not null";
+    $bindList = array($uid);
+    $result = $dbcon->preparedStmt($query, $bindList);
+    if ($result && $template = $result->fetchColumn()) {
+        print "<tr><td>";
+        print "<input type='hidden' name='xstemplate' value=\"$template\">";
+        print pacsone_gettext("Transcription Template:");
+        print "</td>";
+        print "<td>" . sprintf(pacsone_gettext("Transcription template: <u>%s</u> is pre-defined for this study"), $template);
+        print "&nbsp;<input type=submit name='action' value='";
+        print pacsone_gettext("Download") . "' title='";
+        print pacsone_gettext("Download Pre-defined Transcription Template");
+        print "' onclick='switchText(this.form,\"studynoteaction\",\"Xscript\")'>\n";
+        print "</td></tr>\n";
+    }
+    print "<tr><td colspan=2>&nbsp;</td></tr>\n";
+    print "<tr><td><input class=\"btn btn-primary\" type='submit' name='action' value='";
+    print pacsone_gettext("Modify");
+    print "' onclick='switchText(this.form,\"studynoteaction\",\"Modify\")'></td></tr>\n";
+    print "</form></table>\n";
+    print "</td></tr>";
+    print "</table>";
+    require_once 'footer.php';
+    print "</body>\n";
+    print "</html>\n";
+    
+    /*
+    include_once 'checkInput.js';
+    include_once 'checkUncheck.js';
+    global $PRODUCT;
+    global $BGCOLOR;
+    global $dbcon;
+    global $MIME_TBL;
+    $result = $dbcon->query("select maxupload from config");
+    $max = $result->fetchColumn();
+    $maxupload = $max * 1024 * 1024;
+    $disabled = $dbcon->hasaccess("upload", $username)? "" : "disabled";
+    // display Modify Study Notes form
+    print "<html>\n";
+    print "<head><title>$PRODUCT - ";
+    print pacsone_gettext("Modify Study Note");
+    print "</title></head>\n";
+    print "<body>\n";
+    require_once 'header.php';
+    print "<table class=\"table\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
     print "<tr valign=top>";
     print "<td class=notes>";
     displayStudyInfo($patientId, $uid);
@@ -814,6 +1064,7 @@ function modifyEntryForm(&$username, &$patientId, &$uid)
     require_once 'footer.php';
     print "</body>\n";
     print "</html>\n";
+    */
 }
 
 function displayStudyInfo(&$patientId, &$uid)
@@ -871,7 +1122,111 @@ function viewNotesForm(&$username, &$patientId, &$uid)
     print "</title></head>\n";
     print "<body>\n";
     require_once 'header.php';
-    print "<table width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<table class=\"table table-bordered\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<tr valign=top>";
+    print "<td width=\"20%\">";
+    displayStudyInfo($patientId, $uid);
+    print "</td>";
+
+    //print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
+    
+    print "<td>";
+    print "<form method='POST' action='studyNotes.php'>\n";
+    print "<input type='hidden' name='studynoteaction'>\n";
+    print "<input type=hidden name='uid' value='$uid'>\n";
+    $count = 0;
+    $query = "select * from studynotes where uuid=? order by created asc";
+    $bindList = array($uid);
+    $result = $dbcon->preparedStmt($query, $bindList);
+
+    if ($result) {
+        $rows = array();
+        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            $rows[] = $row;
+        }
+        $count = displayNotes("studynotes", $rows, $username, "studyNotes.php", 1, 0);
+    }
+
+    print "<p><table width=60% border=0 cellspacing=0 cellpadding=5>\n";
+    print "<tr>\n";
+    if ($count) {
+        $check = pacsone_gettext("Check All");
+        $uncheck = pacsone_gettext("Uncheck All");
+        print "<td><input class=\"btn btn-primary\" type=button value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'>&nbsp;\n";
+    }
+
+    print "<input type=submit class=\"btn btn-primary\" value='";
+    print pacsone_gettext("Add");
+    print "' name='action' title='";
+    print pacsone_gettext("Add New Study Note");
+    print "' onclick='switchText(this.form,\"studynoteaction\",\"Add\")'>&nbsp;\n";
+    if ($count && $modify) {
+        print "<input class=\"btn btn-primary\" type=submit value='";
+        print pacsone_gettext("Delete");
+        print "' name='action' title='";
+        print pacsone_gettext("Delete Selected Study Notes");
+        print "' onclick='switchText(this.form,\"studynoteaction\",\"Delete\");return confirm(\"";
+        print pacsone_gettext("Are you sure?");
+        print "\");'>&nbsp;\n";
+        // add buttons to approve or disapprove reports
+        print "<input class=\"btn btn-primary\" type=submit value='";
+        print pacsone_gettext("Report OK");
+        print "' name='action' title='";
+        print pacsone_gettext("Report Verified As OK");
+        print "' onclick='switchText(this.form,\"studynoteaction\",\"Approve\");'>";
+        print "&nbsp;\n";
+        print "<input class=\"btn btn-primary\" type=submit value='";
+        print pacsone_gettext("Report Needs Attention");
+        print "' name='action' title='";
+        print pacsone_gettext("Report Needs To Be Verified Again");
+        print "' onclick='switchText(this.form,\"studynoteaction\",\"Disapprove\");'>";
+        print "&nbsp;\n";
+    }
+    if ($count && $download) {
+        print "<input class=\"btn btn-primary\" type=submit value='";
+        print pacsone_gettext("Download");
+        print "' name='action' title='";
+        print pacsone_gettext("Download Selected Study Notes");
+        print "' onclick='switchText(this.form,\"studynoteaction\",\"Download\");'>";
+        print "&nbsp;\n";
+    }
+    print "</tr>\n";
+    if ($count) {
+        $result = $dbcon->query("select * from smtp");
+        if ($result && $result->rowCount()) {
+            print "<tr><td>";
+            print "<input type=submit value='";
+            print pacsone_gettext("Email Study Notes To");
+            print "' name='action' title='";
+            print pacsone_gettext("Email Selected Study Notes To Specified Email Address (es)");
+            print "' onclick='switchText(this.form,\"studynoteaction\",\"Email\");'>";
+            print "&nbsp;<input type='text' name='emailaddr' size=64 maxlength=256>";
+            print "</td></tr>";
+        }
+    }
+    print "</table>\n";
+    print "</form>";
+    print "</td></tr>";
+    print "</table>";
+    require_once 'footer.php';
+    print "</body>\n";
+    print "</html>\n";
+
+    /*
+    include_once "checkUncheck.js";
+    require_once "display.php";
+    global $dbcon;
+    global $PRODUCT;
+    global $BGCOLOR;
+    $modify = $dbcon->hasaccess("modifydata", $username);
+    $download = $dbcon->hasaccess("download", $username);
+    print "<html>\n";
+    print "<head><title>$PRODUCT - ";
+    print pacsone_gettext("Study Notes");
+    print "</title></head>\n";
+    print "<body>\n";
+    require_once 'header.php';
+    print "<table class=\"table\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
     print "<tr valign=top>";
     print "<td class=notes>";
     displayStudyInfo($patientId, $uid);
@@ -955,6 +1310,7 @@ function viewNotesForm(&$username, &$patientId, &$uid)
     require_once 'footer.php';
     print "</body>\n";
     print "</html>\n";
+    */
 }
 
 ?>

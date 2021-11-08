@@ -398,10 +398,26 @@ function cmp_reqdoc($rowa, $rowb)
 	return 0;
 }
 
+function get_magic_quotes_gpc() 
+{
+    if (version_compare(PHP_VERSION, '7.0.0') < 0)
+        return get_magic_quotes_gpc();
+    return false;
+}
+
 function cleanPostPath($path, $toUnixPath = true)
 {
     // strip the extra '\' added by the magic quotes
-    $ret = get_magic_quotes_gpc()? stripslashes($path) : $path;
+	
+	// 2021.11.02 add by rina start
+	if(version_compare(PHP_VERSION,"7.4.0","<")) {
+            $ret = get_magic_quotes_gpc()? stripslashes($path) : $path;
+    }else{
+    	$ret = stripslashes($path);
+    }
+    // 2021.11.02 add by rina end
+
+    
     if ($toUnixPath) {
         // change to Unix-style path
         $ret = str_replace("\\", "/", $ret);

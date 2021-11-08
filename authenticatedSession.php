@@ -16,12 +16,11 @@ class EncryptedSession extends PacsOneRoot {
     var $password;
 
     function EncryptedSession() {
-
-        if(version_compare(PHP_VERSION,"5.0.0","<")) {
+        //if(version_compare(PHP_VERSION,"5.0.0","<")) {
             $args = func_get_args();
             register_shutdown_function( array( &$this, '__destruct' ) );
             call_user_func_array( array( &$this, '__construct' ), $args );
-        }
+        //}
     }
     function __construct($user, $password) {
         if (!session_id())
@@ -74,14 +73,16 @@ class DecryptedSession extends PacsOneRoot {
     var $password;
 
     function DecryptedSession() {
-        echo("PHP_VERSION:".PHP_VERSION);
-        if(version_compare(PHP_VERSION,"5.0.0","<")) {
+        //if(version_compare(PHP_VERSION,"5.0.0","<")) {
             $args = func_get_args();
             register_shutdown_function( array( &$this, '__destruct' ) );
             call_user_func_array( array( &$this, '__construct' ), $args );
-        }
+        //}
     }
     function __construct() {
+
+       // echo("authentificatedSession.php-84-".(!isset($_SESSION['authenticatedUser']) || !isset($_SESSION['authenticatedPassword'])));
+
         if (!session_id())
             session_start();
         if (!isset($_SESSION['authenticatedUser']) || !isset($_SESSION['authenticatedPassword']))

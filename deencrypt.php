@@ -12,11 +12,11 @@ class DeEncrypt {
     var $key;
 
     function DeEncrypt() {
-        if(version_compare(PHP_VERSION,"5.0.0","<")) {
+        //if(version_compare(PHP_VERSION,"5.0.0","<")) {
             $args = func_get_args();
             register_shutdown_function( array( &$this, '__destruct' ) );
             call_user_func_array( array( &$this, '__construct' ), $args );
-        }
+        //}
     }
     function __construct($dir = "") {
         $keyfile = (strlen($dir)? $dir : dirname($_SERVER['SCRIPT_FILENAME'])) . "/$this->KEY_FILE";

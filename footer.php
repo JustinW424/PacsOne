@@ -38,7 +38,7 @@ function isOnTrial($dir)
     return $result;
 }
 
-print "</td></tr>";
+print "<div class='hr'></div>";
 $dir = dirname($_SERVER['SCRIPT_FILENAME']);
 $dir = substr($dir, 0, strlen($dir) - 3);
 // check if license file exists or not
@@ -52,8 +52,7 @@ if (!file_exists($dir . "license.dat") || file_exists($dir . "license.expired"))
     print "</script>\n";
     exit();
 }
-print "<tr><td><HR></td></tr>";
-print "<tr><td><TABLE width=100% border=0 cellpadding=0>";
+print "<tr><td><TABLE class='table footer_table'>";
 print "<TR>";
 print "<TD ALIGN=LEFT>";
 print "<SMALL>$PRODUCT $VERSION</SMALL>";
@@ -61,7 +60,7 @@ print "</TD>";
 $trial = "";
 $expire = isOnTrial($dir);
 if ($expire) {
-    $trial = sprintf(pacsone_gettext("Your trial will expire on %s"), date("r", $expire));
+    $trial = sprintf(pacsone_gettext("Your trial will expire on %s"), date("l, jS \of F Y", $expire));
     $file = $dir . "license.expire";
     if (file_exists($file) && ($fp = fopen($file, "r"))) {
         if ($expire = fgets($fp))

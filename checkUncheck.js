@@ -1,6 +1,6 @@
 <script language="JavaScript" type="text/javascript">
 var last = "false";
-<!--        
+        
 function checkAll(form, field, check, uncheck)
 {
 	var len = form.elements.length;
@@ -49,7 +49,7 @@ function toggleFilter(form, show, hide) {
         }
 	} else {
 		element.display = "inline-block";
-		element.height = "210pt";
+		element.height = "auto"; //"210pt";  // corrected by rina 2021.11.06
 	    var len = form.elements.length;
 	    for (var i = 0; i < len; i++) {
 	        if (form.elements[i].id == "filterButton")
@@ -58,5 +58,4 @@ function toggleFilter(form, show, hide) {
 	}
 }
 
-//-->
 </script>

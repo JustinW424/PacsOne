@@ -30,9 +30,26 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
     for ($count = 0; ($count < $page) && ($count < $total) && (($count + $offset) < $total); $count++) {
         $rows[] = $list[$offset+$count];
     }
-    print "<table width=100% cellpadding=0 cellspacing=0 border=0>\n";
-    print "<tr><td colspan=2><br>$preface</td></tr>\n";
-    print "<tr><td colspan=2><br></td></tr>\n";
+    print "<table class=\"table\" width=100% cellpadding=0 cellspacing=0 border=0>\n";
+    print "<tr><td>$preface</td>\n";  
+    //print "<tr><td colspan=2><br></td></tr>\n";
+     print "<td align=right>\n";
+        if (!$all && ($total > $page)) {
+            $link = urlReplace($url, "all", 1);
+            print "<a href=\"$link\">";
+            print pacsone_gettext("Display All");
+            print "</a>&nbsp;&nbsp;&nbsp;";
+        }
+        else if ($all) {
+            $link = urlReplace($url, "all", 0);
+            print "<a href=\"$link\">";
+            print pacsone_gettext("Paginate");
+            print "</a>&nbsp;&nbsp;&nbsp;";
+        }
+        $start = ($total)? ($offset+1) : 0;
+        printf(pacsone_gettext("Displaying %d-%d of %d %s:"), $start, $count+$offset, $total, $what);
+        print "</td></tr>\n";
+    
     if ($total) {
         // display Previous, Next and Page Number links
         print "<tr><td align=left>\n";
@@ -67,22 +84,7 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
         } else {
             print pacsone_gettext("Next ");
         }
-        print "</td><td align=right>\n";
-        if (!$all && ($total > $page)) {
-            $link = urlReplace($url, "all", 1);
-            print "<a href=\"$link\">";
-            print pacsone_gettext("Display All");
-            print "</a>&nbsp;&nbsp;&nbsp;";
-        }
-        else if ($all) {
-            $link = urlReplace($url, "all", 0);
-            print "<a href=\"$link\">";
-            print pacsone_gettext("Paginate");
-            print "</a>&nbsp;&nbsp;&nbsp;";
-        }
-        $start = ($total)? ($offset+1) : 0;
-        printf(pacsone_gettext("Displaying %d-%d of %d %s:"), $start, $count+$offset, $total, $what);
-        print "</td></tr>\n";
+       print "</tr>\n";
     }
     print "</table><br>\n";
     $url = urlReplace($url, "all", $all);
@@ -91,6 +93,59 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
 
 function displayButtons($level, &$buttons, $hidden, $checkButton = 1)
 {
+    // add by rina  2021.11.06
+    
+    print "<div class=\"btn-group\" style='width:100%;'>\n";
+
+    $check = pacsone_gettext("Check All");
+    $uncheck = pacsone_gettext("Uncheck All");
+    print "<input type='hidden' name='actionvalue'>\n";
+    $ajaxButton = false;
+    if ($checkButton)
+        print "<input type=\"button\" class=\"btn btn-primary\" value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></button>\n";
+
+
+    foreach ($buttons as $key => $values) {
+        $text = $values[0];
+        $title = $values[1];
+        $access = $values[2];
+        if ($access) {
+            $line = "<input type=\"submit\"  class=\"btn btn-primary\" value='$text' name='action' title='$title' ";
+            // applet-specific pre-Show handler
+            if (strcasecmp($key, "Show") == 0) {
+                require "applet.js";
+                $handler = "switchText(this.form,\"actionvalue\",\"$key\"); return appletPreShow()";
+            } else {
+                $handler = "switchText(this.form,\"actionvalue\",\"$key\")";
+            }
+            if (strcasecmp($key, "Delete") == 0) {
+                $confirm = pacsone_gettext("Are you sure?");
+                print "<input type='hidden' name='confirm' value='$confirm'>\n";
+            }
+            if (strcasecmp($key, "Show Filters") == 0) {
+                $line = "<input type=\"button\" class=\"btn btn-primary\" value='$text' id='filterButton' title='$title' ";
+                $show = pacsone_gettext("Show Filters");
+                $hide = pacsone_gettext("Hide Filters");
+                $handler = "toggleFilter(this.form, \"$show\", \"$hide\");return false;";
+            } else if (stristr($key, "Download") || stristr($key, "Delete")) {
+                require_once "ajaxLoader.js";
+                if (stristr($key, "Download"))
+                    $className = strcasecmp($key, "Download")? "ajaxbuttonJPG" : "ajaxbuttonDicom";
+                else
+                    $className = "ajaxbuttonDelete";
+                $line = "<input type=\"button\" class=\"btn btn-primary\" value='$text' title='$title' class='$className' ";
+                $ajaxButton = true;
+            }
+            $line .= "onclick='$handler'>\n";
+            print $line;
+        }
+    }
+
+    print "<input class='form-control' style='float:right; width:20%' id='myInput' type='text' placeholder='Search..'>\n";
+    print "</div>\n";
+    
+
+    /*
     print "<p><table width=20% border=0 cellspacing=0 cellpadding=5>\n";
     print "<tr>\n";
     $check = pacsone_gettext("Check All");
@@ -151,6 +206,7 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1)
         print "</tr>\n";
     }
     print "</table>\n";
+    */
 }
 
 function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
@@ -438,6 +494,329 @@ function getStudyDisplayStyle(&$row)
     return strcasecmp($row['verified'], $STUDY_NEED_VERIFICATION)? "StudyVerified" : "StudyNeedVerification";
 }
 
+function showFilter_Rina($pfiltersEnabled, $pfilters, $peurodate)
+{
+        global $MYFONT;
+        global $dbcon;
+        global $PATIENT_INFO_STUDY_VIEW_TBL;
+        global $STUDY_MODIFY_COLUMNS;
+        global $BGCOLOR;
+
+
+        global $CUSTOMIZE_REFERRING_DOC;
+        global $CUSTOMIZE_READING_DOC;
+        global $CUSTOMIZE_REQUESTING_DOC;
+
+
+        global $STUDY_FILTER_STATUS_READ;
+        global $STUDY_FILTER_STATUS_UNREAD;
+        global $STUDY_FILTER_STATUS_BOTH;
+        global $STUDY_FILTER_STUDYDATE_MASK;
+        global $STUDY_FILTER_STUDYDATE_MASK_BITS;
+        global $STUDY_FILTER_STUDYDATE_ALL;
+        global $STUDY_FILTER_STUDYDATE_TODAY;
+        global $STUDY_FILTER_STUDYDATE_YESTERDAY;
+        global $STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY;
+        global $STUDY_FILTER_STUDYDATE_LAST_N_DAYS;
+        global $STUDY_FILTER_STUDYDATE_FROM_TO;
+        global $STUDY_FILTER_BY_REFERRING_DOC;
+        global $STUDY_FILTER_BY_READING_DOC;
+        global $STUDY_FILTER_BY_DATE_RECEIVED;
+
+        $display = $pfiltersEnabled ? "display:inline-block" : "display:none";
+
+    print "<div id=\"filterSettings\" style=\"overflow:hidden; $display; width:100%;\">";
+
+        print "<table class=\"table\" style=\"width:100%;\">\n";
+            print "<thead>\n";
+                print "<tr class=\"success\"> \n";
+                    print "<th>".pacsone_gettext("Study Status")."</th>\n";
+                    print "<th>".pacsone_gettext("Show Studies From:")."</th>\n";
+                    print "<th>".pacsone_gettext("Filter By:")."</th>\n";
+                    print "<th>".pacsone_gettext("Configurations")."</th>\n";
+                print "</tr>\n";
+            print "</thead>\n";
+
+            print "<tbody>\n";
+                // filter table contents --------------------------------------------
+            print "<tr class=\"active\">\n";
+            // study status column
+            print "<td>";
+
+                $checked = "";
+                if (isset($pfilters['status']))
+                {
+                    $checked = ($pfilters['status'] == $STUDY_FILTER_STATUS_READ)? "checked" : "";
+                }
+                
+                print "<input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_READ $checked>&nbsp;";
+                print pacsone_gettext("Read");
+
+                $checked = "";
+                if (isset($pfilters['status']))
+                {
+                    $checked = ($pfilters['status'] == $STUDY_FILTER_STATUS_UNREAD)? "checked" : "";
+                }
+                
+                print "<br><input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_UNREAD $checked>&nbsp;";
+                print pacsone_gettext("Unread");
+
+                $checked = "";
+                if (isset($pfilters['status']))
+                {
+                    $checked = ($pfilters['status'] == $STUDY_FILTER_STATUS_BOTH)? "checked" : "";
+                }
+                
+                print "<br><input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_BOTH $checked>&nbsp;";
+                print pacsone_gettext("Both");
+            print "</td>\n";
+            // study date filter column
+            print "<td>";
+                $dateType = 0;
+                $datePeriod=0;
+                if(isset($pfilters['studydate']))
+                {
+                    $dateType = ($pfilters['studydate'] & $STUDY_FILTER_STUDYDATE_MASK);
+                    $datePeriod = ($pfilters['studydate'] >> $STUDY_FILTER_STUDYDATE_MASK_BITS);
+                }
+                $checked = ($dateType == $STUDY_FILTER_STUDYDATE_ALL)? "checked" : "";
+                print "<input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_ALL $checked>&nbsp;";
+                print pacsone_gettext("All");
+                $checked = ($dateType == $STUDY_FILTER_STUDYDATE_TODAY)? "checked" : "";
+                print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_TODAY $checked>&nbsp;";
+                print pacsone_gettext("Today");
+                $checked = ($dateType == $STUDY_FILTER_STUDYDATE_YESTERDAY)? "checked" : "";
+                print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_YESTERDAY $checked>&nbsp;";
+                print pacsone_gettext("Yesterday");
+                $checked = ($dateType == $STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY)? "checked" : "";
+                print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY $checked>&nbsp;";
+                print pacsone_gettext("The Day Before Yesterday");
+                $checked = ($dateType == $STUDY_FILTER_STUDYDATE_LAST_N_DAYS)? "checked" : "";
+                print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_LAST_N_DAYS $checked>&nbsp;";
+                printf(pacsone_gettext("Last <input type=text name='filterNdays' value='%s'size=4 maxlength=6> Days"), $datePeriod? "$datePeriod" : "");
+                $checked = ($dateType == $STUDY_FILTER_STUDYDATE_FROM_TO)? "checked" : "";
+                print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_FROM_TO $checked>&nbsp;";
+                print $peurodate? pacsone_gettext("From: (DD-MM-YYYY)") : pacsone_gettext("From: (YYYY-MM-DD)");
+                print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
+                $value = "";
+                if(isset($pfilters['datefrom']))
+                {
+                    $value = $pfilters['datefrom'];    
+                }
+                
+                if ($peurodate)
+                    $value = reverseDate($value);
+                printf("<input type=text name='studyDateFrom' value='%s' size=10 maxlength=16>", strlen($value)? $value : "");
+                print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                print $peurodate? pacsone_gettext("To: (DD-MM-YYYY)") : pacsone_gettext("To: (YYYY-MM-DD)");
+                print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                if(isset($pfilters['dateto']))
+                {
+                    $value = $pfilters['dateto'];    
+                }
+                if ($peurodate)
+                    $value = reverseDate($value);
+                printf("<input type=text name='studyDateTo' value='%s' size=10 maxlength=16>", strlen($value)? $value : "");
+            print "</td>\n";
+
+            // filter by column
+            print "<td>";
+
+                $filterBy = false;
+                if(isset($pfilters['filterby']))
+                {
+                    $filterBy = $pfilters['filterby'];    
+                }
+                
+                $checked = ($filterBy & $STUDY_FILTER_BY_REFERRING_DOC)? "checked" : "";
+                print "<input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_REFERRING_DOC $checked>&nbsp;";
+                print $CUSTOMIZE_REFERRING_DOC;
+                if(isset($pfilters['referdoc'])){
+                    $value = $pfilters['referdoc'];    
+                }
+                
+                printf("&nbsp;<input type=text name='referdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+                $checked = ($filterBy & $STUDY_FILTER_BY_READING_DOC)? "checked" : "";
+                print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_READING_DOC $checked>&nbsp;";
+                print $CUSTOMIZE_READING_DOC;
+                $value = isset($pfilters['readdoc'])?$pfilters['readdoc'] : "";
+                printf("&nbsp;<input type=text name='readdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+                $checked = ($filterBy & $STUDY_FILTER_BY_DATE_RECEIVED)? "checked" : "";
+                print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_DATE_RECEIVED $checked>&nbsp;";
+                print pacsone_gettext("Date When Study Was Received");
+                print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                print $peurodate? pacsone_gettext("From: (DD-MM-YYYY)") : pacsone_gettext("From: (YYYY-MM-DD)");
+                print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                $value = isset($pfilters['receivedfrom']) ? $pfilters['receivedfrom'] : "";
+                if ($peurodate)
+                    $value = reverseDate($value);
+                printf("<input type=text name='receivedfrom' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+                print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                print $peurodate? pacsone_gettext("To: (DD-MM-YYYY)") : pacsone_gettext("To: (YYYY-MM-DD)");
+                print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                $value = isset($pfilters['receivedto']) ? $pfilters['receivedto'] : "";
+                if ($peurodate)
+                    $value = reverseDate($value);
+                printf("<input type=text name='receivedto' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+
+            print "</td>\n";
+
+            // configurations column
+            print "<td>";
+                print "<p>" . pacsone_gettext("Always Display Study Filter Settings");
+                
+                if(isset($pfilters['showsettings']))
+                {
+                    $checked = $pfilters['showsettings']? "checked" : "";    
+                }
+                
+                print "<br><input type=radio name='showsettings' value=1 $checked>";
+                print pacsone_gettext("Yes");
+                if(isset($pfilters['showsettings']))
+                {
+                    $checked = $pfilters['showsettings']? "" : "checked";    
+                }
+                
+                print "<br><input type=radio name='showsettings' value=0 $checked>";
+                print pacsone_gettext("No");
+                print "</td></tr>";
+
+            // filters buttons-------------------------------------------------------------
+
+            print "<tr class=\"danger\">\n";
+                print "<td colspan=2 align='left' style=\"border:0\">";
+                $value = pacsone_gettext("Clear Filters");
+                $title = pacsone_gettext("Clear Filter Settings");
+                print "<input type=\"submit\" class=\"btn btn-primary\" value='$value' name='action' title='$title' onclick='switchText(this.form, \"actionvalue\", \"Clear Filters\")'>";
+                print "</td><td colspan=2 align='right' style=\"border:0\">";
+                $value = pacsone_gettext("Apply Filters");
+                $title = pacsone_gettext("Apply Filter Settings");
+                print "<input type=\"submit\" class=\"btn btn-primary\" value='$value' name='action' title='$title' onclick='switchText(this.form, \"actionvalue\", \"Apply Filters\")'>";
+                print "</td>\n";
+
+            print "</tr>\n";
+        
+        print "</tbody>\n";
+    print "</table>\n";
+
+    print "</div>\n";
+
+
+
+        /*
+        $display = $pfiltersEnabled? "display:inline-block" : "display:none";
+        print "<div id=\"filterSettings\" style=\"overflow:hidden; $display;\">";
+        print "<table width=100% border=1 cellspacing=0 cellpadding=3>";
+        print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+        print "<td align='center'>" . pacsone_gettext("Study Status") . "</td>";
+        print "<td align='center'>" . pacsone_gettext("Show Studies From:") . "</td>";
+        print "<td align='center'>" . pacsone_gettext("Filter By:") . "</td>";
+        print "<td align='center'>" . pacsone_gettext("Configurations") . "</td>";
+        print "</tr>";
+        // study status column
+        print "<tr><td>";
+        $checked = ($pfilters['status'] == $STUDY_FILTER_STATUS_READ)? "checked" : "";
+        print "<input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_READ $checked>&nbsp;";
+        print pacsone_gettext("Read");
+        $checked = ($pfilters['status'] == $STUDY_FILTER_STATUS_UNREAD)? "checked" : "";
+        print "<br><input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_UNREAD $checked>&nbsp;";
+        print pacsone_gettext("Unread");
+        $checked = ($pfilters['status'] == $STUDY_FILTER_STATUS_BOTH)? "checked" : "";
+        print "<br><input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_BOTH $checked>&nbsp;";
+        print pacsone_gettext("Both");
+        print "</td>";
+        // study date filter column
+        print "<td>";
+        $dateType = ($pfilters['studydate'] & $STUDY_FILTER_STUDYDATE_MASK);
+        $datePeriod = ($pfilters['studydate'] >> $STUDY_FILTER_STUDYDATE_MASK_BITS);
+        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_ALL)? "checked" : "";
+        print "<input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_ALL $checked>&nbsp;";
+        print pacsone_gettext("All");
+        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_TODAY)? "checked" : "";
+        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_TODAY $checked>&nbsp;";
+        print pacsone_gettext("Today");
+        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_YESTERDAY)? "checked" : "";
+        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_YESTERDAY $checked>&nbsp;";
+        print pacsone_gettext("Yesterday");
+        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY)? "checked" : "";
+        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY $checked>&nbsp;";
+        print pacsone_gettext("The Day Before Yesterday");
+        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_LAST_N_DAYS)? "checked" : "";
+        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_LAST_N_DAYS $checked>&nbsp;";
+        printf(pacsone_gettext("Last <input type=text name='filterNdays' value='%s'size=4 maxlength=6> Days"), $datePeriod? "$datePeriod" : "");
+        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_FROM_TO)? "checked" : "";
+        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_FROM_TO $checked>&nbsp;";
+        print $peurodate? pacsone_gettext("From: (DD-MM-YYYY)") : pacsone_gettext("From: (YYYY-MM-DD)");
+        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        $value = $pfilters['datefrom'];
+        if ($peurodate)
+            $value = reverseDate($value);
+        printf("<input type=text name='studyDateFrom' value='%s' size=10 maxlength=16>", strlen($value)? $value : "");
+        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        print $peurodate? pacsone_gettext("To: (DD-MM-YYYY)") : pacsone_gettext("To: (YYYY-MM-DD)");
+        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        $value = $pfilters['dateto'];
+        if ($peurodate)
+            $value = reverseDate($value);
+        printf("<input type=text name='studyDateTo' value='%s' size=10 maxlength=16>", strlen($value)? $value : "");
+        print "</td>";
+        // filter by column
+        $filterBy = $pfilters['filterby'];
+        print "<td>";
+        $checked = ($filterBy & $STUDY_FILTER_BY_REFERRING_DOC)? "checked" : "";
+        print "<input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_REFERRING_DOC $checked>&nbsp;";
+        print $CUSTOMIZE_REFERRING_DOC;
+        $value = $pfilters['referdoc'];
+        printf("&nbsp;<input type=text name='referdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+        $checked = ($filterBy & $STUDY_FILTER_BY_READING_DOC)? "checked" : "";
+        print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_READING_DOC $checked>&nbsp;";
+        print $CUSTOMIZE_READING_DOC;
+        $value = $pfilters['readdoc'];
+        printf("&nbsp;<input type=text name='readdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+        $checked = ($filterBy & $STUDY_FILTER_BY_DATE_RECEIVED)? "checked" : "";
+        print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_DATE_RECEIVED $checked>&nbsp;";
+        print pacsone_gettext("Date When Study Was Received");
+        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        print $peurodate? pacsone_gettext("From: (DD-MM-YYYY)") : pacsone_gettext("From: (YYYY-MM-DD)");
+        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        $value = $pfilters['receivedfrom'];
+        if ($peurodate)
+            $value = reverseDate($value);
+        printf("<input type=text name='receivedfrom' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        print $peurodate? pacsone_gettext("To: (DD-MM-YYYY)") : pacsone_gettext("To: (YYYY-MM-DD)");
+        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        $value = $pfilters['receivedto'];
+        if ($peurodate)
+            $value = reverseDate($value);
+        printf("<input type=text name='receivedto' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+        print "</td>";
+        // configurations column
+        print "<td>";
+        print "<p>" . pacsone_gettext("Always Display Study Filter Settings");
+        $checked = $pfilters['showsettings']? "checked" : "";
+        print "<br><input type=radio name='showsettings' value=1 $checked>";
+        print pacsone_gettext("Yes");
+        $checked = $pfilters['showsettings']? "" : "checked";
+        print "<br><input type=radio name='showsettings' value=0 $checked>";
+        print pacsone_gettext("No");
+        print "</td></tr>";
+        print "<tr><td colspan=2 align='left' style=\"border:0\">";
+        $value = pacsone_gettext("Clear Filters");
+        $title = pacsone_gettext("Clear Filter Settings");
+        print "<input type=submit value='$value' name='action' title='$title' onclick='switchText(this.form, \"actionvalue\", \"Clear Filters\")'>";
+        print "</td><td colspan=2 align='right' style=\"border:0\">";
+        $value = pacsone_gettext("Apply Filters");
+        $title = pacsone_gettext("Apply Filter Settings");
+        print "<input type=submit value='$value' name='action' title='$title' onclick='switchText(this.form, \"actionvalue\", \"Apply Filters\")'>";
+        print "</td></tr>";
+        print "</table>";
+        print "</div>";
+        */
+
+}
+
 function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $showFilters = 0)
 {
     include_once 'toggleRowColor.js';
@@ -446,7 +825,7 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     global $PATIENT_INFO_STUDY_VIEW_TBL;
     global $STUDY_MODIFY_COLUMNS;
     global $BGCOLOR;
-    print "<form method='POST' action='actionItem.php'>\n";
+    print "<form style='margin-top:-75px' method='POST' action='actionItem.php'>\n";
     $eurodate = $dbcon->isEuropeanDateFormat();
     // check if Patient Reconciliation is enabled
     $matchWorklist = 0;
@@ -478,7 +857,15 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     $showStudyNotesIcon = $dbcon->showStudyNotesIcon($username);
     $viewAccess = $dbcon->hasaccess("viewprivate", $username);
     $filters = $dbcon->getStudyFilters($username);
-    $filtersEnabled = isset($filters['showsettings']) && $filters['showsettings'];
+    
+    $filtersEnabled = false;
+    if(isset($filters['showsettings']))
+    {
+        $filtersEnabled = $filters['showsettings'];    
+    }
+
+    //print("init show setting =".$filters['showsettings']);
+    
     // check if Java Applet viewer exists
     $showDicom = 0;
     if (appletExists()) {
@@ -516,7 +903,8 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
         $text = $filtersEnabled? pacsone_gettext("Hide Filters") : pacsone_gettext('Show Filters');
         $buttons['Show Filters'] = array($text, pacsone_gettext('Toggle display of filter settings for study view pages'), $viewAccess);
     }
-    displayButtons("study", $buttons, null, sizeof($rows));
+    displayButtons("study", $buttons, null, sizeof($rows)); // ----------------------------
+    
     // check if need to toggle sorting order
     if (isset($_SESSION['sortToggle'])) {
         $toggle = 1 - $_SESSION['sortToggle'];
@@ -551,130 +939,209 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     $columns = $dbcon->getStudyViewColumns($username, $showPatientId);
     if ($matchWorklist)
         $columns[pacsone_gettext("Consistency")] = "studymatchworklist";
+
     if ($showFilters) {
-        global $STUDY_FILTER_STATUS_READ;
-        global $STUDY_FILTER_STATUS_UNREAD;
-        global $STUDY_FILTER_STATUS_BOTH;
-        global $STUDY_FILTER_STUDYDATE_MASK;
-        global $STUDY_FILTER_STUDYDATE_MASK_BITS;
-        global $STUDY_FILTER_STUDYDATE_ALL;
-        global $STUDY_FILTER_STUDYDATE_TODAY;
-        global $STUDY_FILTER_STUDYDATE_YESTERDAY;
-        global $STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY;
-        global $STUDY_FILTER_STUDYDATE_LAST_N_DAYS;
-        global $STUDY_FILTER_STUDYDATE_FROM_TO;
-        global $STUDY_FILTER_BY_REFERRING_DOC;
-        global $STUDY_FILTER_BY_READING_DOC;
-        global $STUDY_FILTER_BY_DATE_RECEIVED;
-        $display = $filtersEnabled? "display:inline-block" : "display:none";
-        print "<div id=\"filterSettings\" style=\"overflow:hidden; $display;\">";
-        print "<table width=100% border=1 cellspacing=0 cellpadding=3>";
-        print "<tr class=listhead bgcolor=$BGCOLOR>\n";
-        print "<td align='center'>" . pacsone_gettext("Study Status") . "</td>";
-        print "<td align='center'>" . pacsone_gettext("Show Studies From:") . "</td>";
-        print "<td align='center'>" . pacsone_gettext("Filter By:") . "</td>";
-        print "<td align='center'>" . pacsone_gettext("Configurations") . "</td>";
-        print "</tr>";
-        // study status column
-        print "<tr><td>";
-        $checked = ($filters['status'] == $STUDY_FILTER_STATUS_READ)? "checked" : "";
-        print "<input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_READ $checked>&nbsp;";
-        print pacsone_gettext("Read");
-        $checked = ($filters['status'] == $STUDY_FILTER_STATUS_UNREAD)? "checked" : "";
-        print "<br><input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_UNREAD $checked>&nbsp;";
-        print pacsone_gettext("Unread");
-        $checked = ($filters['status'] == $STUDY_FILTER_STATUS_BOTH)? "checked" : "";
-        print "<br><input type=radio name='studyStatus' value=$STUDY_FILTER_STATUS_BOTH $checked>&nbsp;";
-        print pacsone_gettext("Both");
-        print "</td>";
-        // study date filter column
-        print "<td>";
-        $dateType = ($filters['studydate'] & $STUDY_FILTER_STUDYDATE_MASK);
-        $datePeriod = ($filters['studydate'] >> $STUDY_FILTER_STUDYDATE_MASK_BITS);
-        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_ALL)? "checked" : "";
-        print "<input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_ALL $checked>&nbsp;";
-        print pacsone_gettext("All");
-        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_TODAY)? "checked" : "";
-        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_TODAY $checked>&nbsp;";
-        print pacsone_gettext("Today");
-        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_YESTERDAY)? "checked" : "";
-        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_YESTERDAY $checked>&nbsp;";
-        print pacsone_gettext("Yesterday");
-        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY)? "checked" : "";
-        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_DAY_BEFORE_YESTERDAY $checked>&nbsp;";
-        print pacsone_gettext("The Day Before Yesterday");
-        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_LAST_N_DAYS)? "checked" : "";
-        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_LAST_N_DAYS $checked>&nbsp;";
-        printf(pacsone_gettext("Last <input type=text name='filterNdays' value='%s'size=4 maxlength=6> Days"), $datePeriod? "$datePeriod" : "");
-        $checked = ($dateType == $STUDY_FILTER_STUDYDATE_FROM_TO)? "checked" : "";
-        print "<br><input type=radio name='studyDate' value=$STUDY_FILTER_STUDYDATE_FROM_TO $checked>&nbsp;";
-        print $eurodate? pacsone_gettext("From: (DD-MM-YYYY)") : pacsone_gettext("From: (YYYY-MM-DD)");
-        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        $value = $filters['datefrom'];
-        if ($eurodate)
-            $value = reverseDate($value);
-        printf("<input type=text name='studyDateFrom' value='%s' size=10 maxlength=16>", strlen($value)? $value : "");
-        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print $eurodate? pacsone_gettext("To: (DD-MM-YYYY)") : pacsone_gettext("To: (YYYY-MM-DD)");
-        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        $value = $filters['dateto'];
-        if ($eurodate)
-            $value = reverseDate($value);
-        printf("<input type=text name='studyDateTo' value='%s' size=10 maxlength=16>", strlen($value)? $value : "");
-        print "</td>";
-        // filter by column
-        $filterBy = $filters['filterby'];
-        print "<td>";
-        $checked = ($filterBy & $STUDY_FILTER_BY_REFERRING_DOC)? "checked" : "";
-        print "<input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_REFERRING_DOC $checked>&nbsp;";
-        print $CUSTOMIZE_REFERRING_DOC;
-        $value = $filters['referdoc'];
-        printf("&nbsp;<input type=text name='referdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
-        $checked = ($filterBy & $STUDY_FILTER_BY_READING_DOC)? "checked" : "";
-        print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_READING_DOC $checked>&nbsp;";
-        print $CUSTOMIZE_READING_DOC;
-        $value = $filters['readdoc'];
-        printf("&nbsp;<input type=text name='readdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
-        $checked = ($filterBy & $STUDY_FILTER_BY_DATE_RECEIVED)? "checked" : "";
-        print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_DATE_RECEIVED $checked>&nbsp;";
-        print pacsone_gettext("Date When Study Was Received");
-        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print $eurodate? pacsone_gettext("From: (DD-MM-YYYY)") : pacsone_gettext("From: (YYYY-MM-DD)");
-        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        $value = $filters['receivedfrom'];
-        if ($eurodate)
-            $value = reverseDate($value);
-        printf("<input type=text name='receivedfrom' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
-        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print $eurodate? pacsone_gettext("To: (DD-MM-YYYY)") : pacsone_gettext("To: (YYYY-MM-DD)");
-        print "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        $value = $filters['receivedto'];
-        if ($eurodate)
-            $value = reverseDate($value);
-        printf("<input type=text name='receivedto' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
-        print "</td>";
-        // configurations column
-        print "<td>";
-        print "<p>" . pacsone_gettext("Always Display Study Filter Settings");
-        $checked = $filters['showsettings']? "checked" : "";
-        print "<br><input type=radio name='showsettings' value=1 $checked>";
-        print pacsone_gettext("Yes");
-        $checked = $filters['showsettings']? "" : "checked";
-        print "<br><input type=radio name='showsettings' value=0 $checked>";
-        print pacsone_gettext("No");
-        print "</td></tr>";
-        print "<tr><td colspan=2 align='left' style=\"border:0\">";
-        $value = pacsone_gettext("Clear Filters");
-        $title = pacsone_gettext("Clear Filter Settings");
-        print "<input type=submit value='$value' name='action' title='$title' onclick='switchText(this.form, \"actionvalue\", \"Clear Filters\")'>";
-        print "</td><td colspan=2 align='right' style=\"border:0\">";
-        $value = pacsone_gettext("Apply Filters");
-        $title = pacsone_gettext("Apply Filter Settings");
-        print "<input type=submit value='$value' name='action' title='$title' onclick='switchText(this.form, \"actionvalue\", \"Apply Filters\")'>";
-        print "</td></tr>";
-        print "</table>";
-        print "</div>";
+        showFilter_Rina($filtersEnabled, $filters, $eurodate);
     }
+
+    // display studies. ========================================
+    print "<div class=\"row\">\n";
+
+    print "<div class=\"tableFixHead\">\n";
+    
+ print "<table class=\"table table-hover  table-bordered  table-striped\" style=\"margin-bottom: 0px;\">\n";  // attatch the bottom btn group without gap.=>margin-bottom: 0px;
+    print "<thead>\n";
+      print "<tr class=\"Info\">\n";
+
+        if ($checkbox) {
+            print "\t<th></th>\n";
+        }
+        if ($modifyAccess) {
+            print "\t<th><b>";
+            print pacsone_gettext("Privacy");
+            print "</b></th>\n";
+        }
+        foreach (array_keys($columns) as $key) {
+            if (count($rows) && isset($links[$key])) {
+                $link = $links[$key];
+                print "\t<th><b><a href=$link>$key</a></b></th>\n";
+            } else {
+                print "\t<th><b>$key</b></th>\n";
+            }
+        }
+        print "\t<th><b>";
+        print pacsone_gettext("Total Number of Instances");
+        print "</b></th>\n";
+
+      print "</tr>\n";
+    print "</thead>\n";
+
+    // -------------------------  Tbody -----
+    print "<tbody id='studyTable'>\n";
+
+    foreach ($rows as $row) {
+        $patientId = $row["patientid"];
+        $uid = isset($row['studyuid'])? $row['studyuid'] : $row['uuid'];
+        $instances = $dbcon->getStudyInstanceCount($uid);
+        $style = getStudyDisplayStyle($row);
+        print "<tr>\n";
+        print "\t<td align=center width='1%'>\n";
+        if ($checkbox)
+            print "\t\t<input type='checkbox' name='entry[]' value='$uid'>";
+        // display icon for expanding view of the study
+        $skip = ($skipSeries && $dbcon->hasSRseries($uid))? false : $skipSeries;
+        $expandUrl = $skip? "image.php" : "series.php";
+        $expandUrl .= sprintf("?patientId=%s&studyId=%s", urlencode($patientId), $uid);
+        $alt = pacsone_gettext("Expand to Series Level");
+        print "<a href='$expandUrl'><img src='expand.png' border=0 title='$alt'></a>";
+        if ($showStudyNotesIcon) {
+            // display icon for study notes and attachments
+            $notes = $dbcon->query("select count(*) from studynotes where uuid='$uid'");
+            $count = 0;
+            if ($notes && ($notesRow = $notes->fetch(PDO::FETCH_NUM)))
+                $count = $notesRow[0];
+            $notes = $count;
+            $atts = $dbcon->query("select count(*) from attachment where uuid='$uid'");
+            $count = 0;
+            if ($atts && ($attsRow = $atts->fetch(PDO::FETCH_NUM)))
+                $count = $attsRow[0];
+            $atts = $count;
+            $img = $notes? "notes.png" : "notes_none.png";
+            $url = "studyNotes.php?view=1&uid=$uid";
+            $alt = sprintf(pacsone_gettext("%d Notes and %d Attachments"), $notes, $atts);
+            print "<a href='$url'><img src='$img' border=0 title='$alt' alt='$alt'></a>";
+        }
+        print "</td>\n";
+        if ($modifyAccess) {
+            $current = $row["private"];
+            $value = ($current)? pacsone_gettext("Private ") : pacsone_gettext("Public ");
+            if ($current) {
+                $toggle = "<font color=red>";
+                $toggle .= pacsone_gettext("Change to Public");
+                print "</font>";
+            } else {
+                $toggle = pacsone_gettext("Change to Private");
+            }
+            print "\t<td>$MYFONT$value</font><br>";
+            print "<a href='markStudy.php?id=$uid&current=$current'>$toggle</a></font></td>\n";
+        }
+        foreach ($columns as $key => $field) {
+            $value = "";
+            if (!strcasecmp($field, "commitreport") && $instances) {
+                // get Storage Commitment Report status for this study
+                $screport = $dbcon->getStorageCommitStatus($uid);
+                if ($screport) {
+                    $icon = $screport['icon'];
+                    $descr = $screport['descr'];
+                    $value = "<IMG SRC=\"$icon\" title=\"$descr\" ALT=\"$descr\">$descr</IMG>";
+                }
+            } else if (isset($row[$field])) {
+                $value = $row[$field];
+                if (!strcasecmp($field, "studydate") || !strcasecmp($field, "birthdate"))
+                    $value = $dbcon->formatDate($value);
+                else if (!strcasecmp($field, "sourceae")) {
+                    // get the description information for the Source AE
+                    $subq = "SELECT description FROM applentity WHERE title=?";
+                    $subList = array($value);
+                    $aet = $dbcon->preparedStmt($subq, $subList);
+                    if ($aet && ($desc = $aet->fetchColumn())) {
+                        if (strlen($desc))
+                            $value .= " - " . $desc;
+                    }
+                }
+            }
+            if ($showPatientId && in_array($field, $PATIENT_INFO_STUDY_VIEW_TBL)) {
+                if (!strcasecmp($field, "patientid")) {
+                    $value = strlen($patientId)? $patientId : pacsone_gettext("(Blank)");
+                    if ($modifyAccess)
+                        $value = "<a href='splitStudy.php?uid=$uid&patientId=" . urlencode($patientId) . "'>$value</a>";
+                } else if (!strcasecmp($field, "patientname")) {
+                    $name = $dbcon->getPatientName($patientId);
+                    $value = "<a href='study.php?patientId=" . urlencode($patientId) . "'>";
+                    $value .= strlen($name)? $name : pacsone_gettext("(Blank)");
+                    $value .= "</a>";
+                }
+            }
+            if (strcasecmp($key, pacsone_gettext("Study ID")) == 0) {
+                if (!strlen($value))
+                    $value = pacsone_gettext("Study Details");
+                $value = sprintf("<a href='%s'>%s</a>", $expandUrl, $value);
+            }
+            else if (in_array(strtolower($field), $STUDY_MODIFY_COLUMNS)) {
+                $encoded = urlencode($value);
+                $reportUrl = "";
+                $celldata = "";
+                if (strlen($value) && !strcasecmp($key, pacsone_gettext("Accession Number"))) {
+                    // check if any ORU report is available for this accession number
+                    $controlId = $dbcon->getObservationReports($value);
+                    if (strlen($controlId)) {
+                        $reportUrl = "oruReports.php?uuid=" . urlencode($controlId);
+                        $reportUrl .= "&accessionnum=" . urlencode($value);
+                    }
+                }
+                if ($modifyAccess) {
+                    $key = urlencode($key);
+                    $url = "modifyStudy.php?uid=$uid&key=$key&column=$field&value=$encoded";
+                    $celldata = "<a href='$url'>$value</a>";
+                } else {
+                    $celldata = $value;
+                }
+                if (strlen($reportUrl)) {
+                    $celldata .= "<br>&nbsp;";
+                    $celldata .= "<br><a href=\"$reportUrl\">";
+                    $celldata .= pacsone_gettext("Observation Reports");
+                    $celldata .= "</a>";
+                }
+                if (strlen($value) && strlen($celldata))
+                    $value = $celldata;
+            }
+            else if (!strcasecmp($key, pacsone_gettext("Read By")) && strlen($value)) {
+                if ($dbcon->isAdministrator($value))
+                    $value = pacsone_gettext("Administrator");
+                else {
+                    $subq = "select * from privilege where username=?";
+                    $subList = array($value);
+                    $profile = $dbcon->preparedStmt($subq, $subList);
+                    if ($profile && ($userRow = $profile->fetch(PDO::FETCH_ASSOC))) {
+                        $name = $userRow['firstname'] . " " . $userRow['lastname'];
+                        $email = $userRow['email'];
+                        if (strlen($email))
+                            $value = "<a href='mailto:$email'>$name</a>";
+                        else
+                            $value = $name;
+                    }
+                }
+            }
+            else if (!strcasecmp($key, pacsone_gettext("Consistency"))) {
+                $imgsrc = "";
+                if ($value == 1)
+                    $imgsrc = "<img src='ok.gif' title='Consistent With Worklist Data'>";
+                else if ($value == 2)
+                    $imgsrc = "<img src='warning.gif' title='Inconsistent With Worklist Data'>";
+                $value = $imgsrc;
+            }
+            else if (!strcasecmp($field, "received")) {
+                $value = $dbcon->formatDateTime($value);
+            }
+            else if (strcasecmp($field, "modalities") == 0) {
+                if (strlen($value) == 0)
+                    $value = $dbcon->getStudyModalities($uid);
+            }
+            if (!strlen($value))
+                $value = pacsone_gettext("N/A");
+            print "\t<td>$MYFONT$value</font></td>\n";
+        }
+        print "\t<td>$instances</td>\n";
+        print "</tr>\n";
+    }
+      
+    print "</tbody>\n";
+  print "</table>\n";
+  
+  print "</div>\n";
+  print "</div>\n";
+
+/*
     print "<table width=100% border=0 cellpadding=3 class='mouseover optionrow'>\n";
     print "<tr class=listhead bgcolor=$BGCOLOR>\n";
     if ($checkbox) {
@@ -853,10 +1320,25 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
         print "</tr>\n";
     }
     print "</table>\n";
-    if ($checkbox) {
-        displayButtons("study", $buttons, null);
-    }
+    */
+
+  // ----------------------------------------------------
+
+    // if ($checkbox) {
+    //     displayButtons("study", $buttons, null);
+    // }
     print "</form>\n";
+    print "<script src=\"cornerstone/jquery.min.js\"></script>\n";
+    print   "<script>
+                $(document).ready(function(){
+                    $(\"#myInput\").on(\"keyup\", function() {
+                        var value = $(this).val().toLowerCase();
+                        $(\"#studyTable tr\").filter(function() {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                        });\n
+                    });\n
+                });
+            </script>\n";
 }
 
 function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStudyNotes)
@@ -865,16 +1347,16 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
     global $BGCOLOR;
     global $MYFONT;
     global $CUSTOMIZE_PATIENT;
-    print "<table width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<table class=\"table table-bordered\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
     print "<tr valign=top>";
     if ($showStudyNotes) {
-        print "<td class=notes>";
+        print "<td width=\"20%\">"; // -----  Left panel
         $params = array();
         parse_str($url, $params);
         $studyUid = $params["studyId"];
         displayStudyNotes($studyUid);
         print "</td>";
-        print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
+        //print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
     }
     global $dbcon;
     if ($showStudyNotes && count($list) == 0) {
@@ -884,7 +1366,7 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
         $result = $dbcon->preparedStmt($query, $bindList);
         if ($result && $result->rowCount()) {
             $row = $result->fetch(PDO::FETCH_ASSOC);
-            print "<td><br>";
+            print "<td = width=\"20%\"><br>";   // -----  Left panel
             printf(pacsone_gettext("This study has been <a href='tools.php'>Exported</a> by <b>%s</b> to media label \"<u><b>%s</b></u>\" on %s<br>"), $row['username'], $row['label'], $row['exported']);
             print "<br>";
             printf(pacsone_gettext("To restore all series of this study, please insert the media labeled \"<b><u>%s</u></b>\" and <a href='tools.php'>Import</a> from that media<br>"), $row['label']);
@@ -893,7 +1375,7 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
             return;
         }
     }
-    print "<td>";
+    print "<td>";  // right panel
     $rows = displayPageControl(pacsone_gettext("Series"), $list, $preface, $url, $offset, $all);
     $checkbox = 0;
 	$username = $dbcon->username;
@@ -950,8 +1432,8 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
         pacsone_gettext("Operator Name")    => "operatorname",
         pacsone_gettext("Total Instances")  => "instances",
         pacsone_gettext("Description")      => "description");
-    print "<table width=100% border=0 cellpadding=5>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class=\"table\" width=100% border=0 cellpadding=5>\n";
+    print "<tr class=\"success\">\n";
     if ($checkbox) {
         print "\t<td></td>\n";
     }
@@ -971,7 +1453,7 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
             print "\t<td><b>$key</b></td>\n";
         }
     }
-    print "</tr>\n";
+    print "</tr class=\"Danger\">\n";
     // find patient id
     if ($showStudyNotes && count($rows)) {
         $studyUid = $rows[0]['studyuid'];
@@ -992,8 +1474,8 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
         }
     }
     foreach ($rows as $row) {
-		$uid = $row['uuid'];
-        print "<tr>\n";
+        $uid = $row['uuid'];
+        print "<tr class=\"Info\">\n";
         if ($checkbox) {
 	        print "\t<td align=center width='1%'>\n";
 	        print "\t\t<input type='checkbox' name='entry[]' value='$uid'></td>\n";
@@ -3890,7 +4372,7 @@ function displayStudyNotes(&$uid)
         print "<form method='POST' action='studyNotes.php'>\n";
         print "<input type='hidden' name='studynoteaction'>\n";
         print "<p><input type=hidden name='uid' value='$uid'>\n";
-        print "<input type=submit value='";
+        print "<input class=\"btn btn-primary\" type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add New Study Note");
@@ -3948,6 +4430,144 @@ function displayImageNotes(&$uid)
 
 function displayNotes($table, &$rows, $username, $url, $checkbox, $showExtra)
 {
+    global $dbcon;
+    global $MYFONT;
+    global $BGCOLOR;
+    // check whether to bypass Series level
+    $skipSeries = 0;
+    $result = $dbcon->query("select skipseries from config");
+    if ($result && ($row = $result->fetch(PDO::FETCH_NUM)))
+        $skipSeries = $row[0];
+    $count = 0;
+    $modifyAccess = $dbcon->hasaccess("modifydata", $username);
+    $download = $dbcon->hasaccess("download", $username);
+    // display all notes for this study
+    $columns = array(
+        pacsone_gettext("Subject")       => "headline",
+        pacsone_gettext("User")          => "username",
+        pacsone_gettext("When")          => "created",
+        pacsone_gettext("Notes")         => "notes",
+    );
+    global $CUSTOMIZE_PATIENT_NAME;
+    $extras = array($CUSTOMIZE_PATIENT_NAME, pacsone_gettext("Study ID"));
+    print "<p>";
+    $notes = count($rows);
+    $what = strcasecmp($table, "studynotes")? "image" : "study";
+    if ($notes < 2)
+        printf(pacsone_gettext("There is %d note for this %s"), $notes, $what);
+    else
+        printf(pacsone_gettext("There are %d notes for this %s"), $notes, $what);
+    print "<p><table class=\"table table-bordered  table-striped\" width='100%' border=0 cellpadding=2 cellspacing=0>\n";
+
+    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class=\"danger\">\n"; // -------------------
+
+    if ($modifyAccess && $checkbox)
+        print "<td>&nbsp;</td>";
+    foreach ($columns as $key => $field) {
+        print "<td><b>$key</b></td>\n";
+    }
+    if ($showExtra) {
+        foreach ($extras as $key)
+            print "<td><b>$key</b></td>\n";
+    }
+    print "<td><b>" . pacsone_gettext("Attachments") . "</b></td>\n";
+    print "<td><b>" . pacsone_gettext("Action") . "</b></td>\n";
+    print "</tr>\n";  // ----------------------------------------
+
+    foreach ($rows as $row) {
+        $noteid = $row['id'];
+        $uid = $row['uuid'];
+        $author = $row['username'];
+        $modifyNote = $dbcon->checkIsMyNote($table, $username, $noteid, $author);
+        if (strcasecmp($table, "studynotes") == 0) {
+            $studyUid = $uid;
+        } else {
+            // find the Study UID from this instance UID
+            $result = $dbcon->query("select seriesuid from image where uuid='$uid'");
+            if (!$result || $result->rowCount() != 1)
+                die("<font color=red>" . pacsone_gettext("Failed to find Series UID!") . "</font>");
+            $series = $result->fetch(PDO::FETCH_NUM);
+            $seriesUid = $series[0];
+            $result = $dbcon->query("select studyuid from series where uuid='$seriesUid'");
+            if (!$result || $result->rowCount() != 1)
+                die("<font color=red>" . pacsone_gettext("Failed to find Study UID!") . "</font>");
+            $studyUid = $result->fetchColumn();
+        }
+        print "<tr class=\"info\">\n"; // ----------------------- for tr ----------------
+        if (($modifyAccess || $download) || $modifyNote) {
+            $count++;
+            if ($checkbox) {
+                print "<td align=center width='1%'>\n";
+                print "<input type='checkbox' name='entry[]' value=$noteid></td>\n";
+            }
+        }
+        else
+            print "<td>&nbsp;</td>\n";
+        foreach ($columns as $key => $field) {
+            $value = $row[$field];
+            if ($modifyNote && !strcasecmp($field, "headline")) {
+                $link = "$url?view=1&uid=" . urlencode($uid);
+                print "<td><a href='$link'>$value</a></td>\n";
+            } else if (strcasecmp($field, "created") == 0) {
+                $value = $dbcon->formatDateTime($value);
+                printf("<td>$MYFONT%s</font></td>\n", $value);
+            } else if (strcasecmp($field, "notes") == 0) {
+                // convert line breaks into HTML
+                $value = str_replace("\r\n", "<br>", $value);
+                $value = str_replace("\n", "<br>", $value);
+                $value = str_replace("\r", "<br>", $value);
+                printf("<td>$MYFONT%s</font></td>\n", $value);
+            } else {
+                printf("<td>$MYFONT%s</font></td>\n", $value);
+            }
+        }
+        // display extra information if requested
+        if ($showExtra) {
+            $patientId = $dbcon->getPatientIdByStudyUid($studyUid);
+            $value = $dbcon->getPatientNameByStudyUid($studyUid);
+            $link = "study.php?patientId=" . urlencode($patientId);
+            print "<td><a href='$link'>$value</a></td>\n";
+            $value = $dbcon->getStudyId($studyUid);
+            $skip = ($skipSeries && $dbcon->hasSRseries($studyUid))? false : $skipSeries;
+            $link = $skip? "image.php" : "series.php";
+            $link = "$link?patientId=" . urlencode($patientId) . "&studyId=" . urlencode($studyUid);
+            print "<td><a href='$link'>$value</a></td>\n";
+        }
+        // display attachments if any
+        $attach = $dbcon->query("select * from attachment where id=$noteid and uuid='$uid'");
+        if ($attach && $attach->rowCount()) {
+            print "<td>";
+            while ($attRow = $attach->fetch(PDO::FETCH_ASSOC)) {
+                $path = $attRow['path'];
+                $file = basename($path);
+                $size = file_exists($path)? filesize($path) : $attRow['totalsize'];
+                if ($download) {
+                    $downloadUrl = "downloadAttachment.php?";
+                    $downloadUrl .= "seq=" . $attRow['seq'];
+                    $downloadUrl .= "&id=$noteid&uid=" . urlencode($uid);
+                    print "<a href='$downloadUrl'><img src='attachment.gif' border=0>$file</a>";
+                }
+                else
+                    print "<img src='attachment.gif' border=0>$file";
+                print " ($size bytes)<br>";
+            }
+            print "</td>\n";
+        } else {
+            print "<td>" . pacsone_gettext("N/A") . "</td>\n";
+        }
+        if ($modifyNote) {
+            $link = "$url?modify=1&id=$noteid&uid=" . urlencode($uid);
+            print "<td><a href='$link'>" . pacsone_gettext("Edit") . "</a></td>\n";
+        } else {
+            print "<td>" . pacsone_gettext("N/A") . "</td>\n";
+        }
+        print "</tr>\n"; // ----------------------- for tr -----------------------
+    }
+    print "</table><p>\n";
+    return $count;
+
+    /*
     global $dbcon;
     global $MYFONT;
     global $BGCOLOR;
@@ -4080,6 +4700,7 @@ function displayNotes($table, &$rows, $username, $url, $checkbox, $showExtra)
     }
     print "</table><p>\n";
     return $count;
+    */
 }
 
 function displayExportForm($level, &$exportdir)

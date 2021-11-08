@@ -305,6 +305,9 @@ class MyDatabase extends PacsOneRoot {
 	    // check the user privilege table for all other users
         $query = "select $access from privilege where username=?";
         $bindList = array($username);
+
+        echo("query=".$query." "."bindlist=".$bindList);
+
         $result = $this->preparedStmt($query, $bindList);
 	    if (!$result)
             return 0;
@@ -1950,7 +1953,10 @@ class MyConnection extends MyDatabase {
         if (!session_id())
             session_start();
         $hostname = isset($_SESSION['authenticatedHost'])? $_SESSION['authenticatedHost'] : "localhost";
-        $this->database = $_SESSION['authenticatedDatabase'];
+        $this->database = isset($_SESSION['authenticatedDatabase'])? $_SESSION['authenticatedDatabase'] : "dicom";
+
+        //echo("database.php-1958-".$this->database);
+
         require_once 'authenticatedSession.php';
         $authenticated = new DecryptedSession();
         $this->username = $authenticated->getUsername();

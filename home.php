@@ -108,7 +108,11 @@ print "<html>";
 $refresh = $dbcon->getAutoRefresh($username);
 print "<META HTTP-EQUIV=REFRESH CONTENT=$refresh>";
 print "<head><title>$PRODUCT - $title</title></head>";
-print "<body>";
+
+
+print "<body>
+        <div class='main_content'";
+
 require_once 'header.php';
 // sort the rows based on Study ID by default
 my_usort($rows, $sort, $toggle);
@@ -117,6 +121,7 @@ $_SESSION['sortToggle'] = $toggle;
 $url = "home.php?sort=" . urlencode($sort) . "&toggle=$toggle";
 displayStudies($rows, $preface, $url, $offset, 1, $all, 1);
 require_once 'footer.php';
-print "</body>";
+print "</div>
+    </body>";
 print "</html>";
 ?>

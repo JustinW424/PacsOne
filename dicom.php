@@ -742,7 +742,7 @@ function pacsone_dump(&$data) {
 	for ($i = 0; $i < $length; $i++) {
 		if ($i % 16 == 0)
 			print "<tr>";
-		print "<td>" . dechex(ord($data{$i})) . "</td>";
+		print "<td>" . dechex(ord($data[$i])) . "</td>";  // 2021.11.02  by rina
 		if ($i % 16 == 15)
 			print "</tr>";
 	}
@@ -998,11 +998,11 @@ function dicomValueToXml($key, $vr, &$value)
 class BaseObject {
 
     function BaseObject() {
-        if(version_compare(PHP_VERSION,"5.0.0","<")) {
+        //if(version_compare(PHP_VERSION,"5.0.0","<")) {
             $args = func_get_args();
             register_shutdown_function( array( &$this, '__destruct' ) );
             call_user_func_array( array( &$this, '__construct' ), $args );
-        }
+        //}
     }
     function __construct() { }
     function __destruct() { }
@@ -1202,9 +1202,9 @@ class AssociateRequestPdu extends BaseObject {
 		#pacsone_dump($present);
         // check the Presentation Context item
         do {
-            $itemType = ord($present{0});
-            $ctxId = ord($present{4});
-            $reason = ord($present{6});
+            $itemType = ord($present[0]);
+            $ctxId = ord($present[4]);
+            $reason = ord($present[6]);
             if ( ($itemType == 0x21) && in_array($ctxId, $this->abstract) &&
                  ($reason == 0) ) {
                 // use the first accepted presentation context
@@ -1321,7 +1321,7 @@ class CMatchResult extends BaseObject {
             if (isset($ATTR_TBL[$key])) {
                 $body = substr($data, strlen($header), $length);
                 $format = $ATTR_TBL[$key]->type;
-                if (strcasecmp($format{0}, "A") == 0)
+                if (strcasecmp($format[0], "A") == 0)
                     $format .= $length;
                 $format .= 'value';
                 $array = unpack($format, $body);
@@ -1686,13 +1686,13 @@ class Item extends DicomObject {
 				//print "Item Key = " . dechex($key) . " Length = $length Format = $format<br>";
 				$body = substr($data, strlen($header));
 				if ( ($length == $UNDEF_LEN) || (isset($vr) && !strcasecmp($vr, "SQ")) ||
-                     (strcasecmp($format{0}, "S") == 0) ) {		// sequence
+                     (strcasecmp($format[0], "S") == 0) ) {		// sequence
 					if ($length == $UNDEF_LEN)
 						$length = strlen($body);
 					$this->attrs[$key] = new Sequence($key, $length, $body, $explicit, $bigEndian);
 					$length = $this->attrs[$key]->getLength();
 				} else {
-					if (strcasecmp($format{0}, "A") == 0)
+					if (strcasecmp($format[0], "A") == 0)
 						$format .= $length;
 					$format .= 'value';
 					$array = unpack($format, $body);
@@ -1797,7 +1797,7 @@ class CAttributeList extends BaseObject {
             $length = $array['length'];
 			$body = substr($data, strlen($header), $length);
 			$format = $ATTR_TBL[$key]->type;
-			if (strcasecmp($format{0}, "A") == 0)
+			if (strcasecmp($format[0], "A") == 0)
 				$format .= $length;
 			$format .= 'value';
 			$array = unpack($format, $body);
@@ -1852,7 +1852,7 @@ class CFindPdv extends BaseObject {
     }
     function recvResponse(&$data, &$complete, &$error) {
 		// check PDV header to see if it's a Command or Dataset
-		$msgHdr = ord($data{5});
+		$msgHdr = ord($data[5]);
         // skip to Group Length
         $data = substr($data, 6);
 		if ($msgHdr & 0x1) {
@@ -1995,7 +1995,7 @@ class WorklistFindPdv extends BaseObject {
     }
     function recvResponse(&$data, &$complete, &$error) {
 		// check PDV header to see if it's a Command or Dataset
-		$msgHdr = ord($data{5});
+		$msgHdr = ord($data[5]);
         // skip to Group Length
         $data = substr($data, 6);
 		if ($msgHdr & 0x1) {
@@ -2116,7 +2116,7 @@ class GetPrinterPdv extends BaseObject {
     }
     function recvResponse(&$data, &$complete, &$error) {
 		// check PDV header to see if it's a Command or Dataset
-		$msgHdr = ord($data{5});
+		$msgHdr = ord($data[5]);
         // skip to Group Length
         $data = substr($data, 6);
 		if ($msgHdr & 0x1) {
@@ -2260,7 +2260,7 @@ class CMovePdv extends BaseObject {
     }
     function recvResponse(&$data, &$complete, &$error) {
 		// check PDV header to see if it's a Command or Dataset
-		$msgHdr = ord($data{5});
+		$msgHdr = ord($data[5]);
         // skip to Group Length
         $data = substr($data, 6);
 		if ($msgHdr & 0x1) {
@@ -3378,7 +3378,7 @@ class Association extends BaseObject {
         $data = fread($this->socket, 6);
 		#pacsone_dump($data);
         // check the PDU type
-        if ($data && ord($data{0}) == 0x2) {
+        if ($data && ord($data[0]) == 0x2) {
             $array = unpack('Ctype/Cdummy/Nlength', $data);
 			$pduLen = $array['length'];
         	$data = fread($this->socket, $pduLen);
@@ -3404,7 +3404,7 @@ class Association extends BaseObject {
 			// check received ASSOCIATE_RELEASE_RP PDU
    		    $data = fread($this->socket, 10);
             if (strlen($data)) {
-			    $pduType = ord($data{0});
+			    $pduType = ord($data[0]);
                 /*
    	     	    if ($pduType != 0x6)
            		    $error .= "Invalid ASSOCIATE_RELEASE_RSP PDU received: pduType = " . $pduType;
@@ -3430,7 +3430,7 @@ class Association extends BaseObject {
         // check the PDU type
 		$respComplete = false;
 		do {
-        	if ($data && ord($data{0}) == 0x4) {
+        	if ($data && ord($data[0]) == 0x4) {
             	$array = unpack('Ctype/Cdummy/Nlength', $data);
 		    	$pduLen = $array['length'];
             	$data = fread($this->socket, $pduLen);
@@ -3473,7 +3473,7 @@ class Association extends BaseObject {
         do {
             $data = fread($this->socket, 6);
             // check the PDU type
-            if ($data && ord($data{0}) == 0x4) {
+            if ($data && ord($data[0]) == 0x4) {
                 $array = unpack('Ctype/Cdummy/Nlength', $data);
 		        $pduLen = $array['length'];
                 $data = fread($this->socket, $pduLen);
@@ -3515,7 +3515,7 @@ class Association extends BaseObject {
         do {
             $data = fread($this->socket, 6);
             // check the PDU type
-            if ($data && ord($data{0}) == 0x4) {
+            if ($data && ord($data[0]) == 0x4) {
                 $array = unpack('Ctype/Cdummy/Nlength', $data);
 		        $pduLen = $array['length'];
                 $data = fread($this->socket, $pduLen);
@@ -3555,7 +3555,7 @@ class Association extends BaseObject {
         do {
             $data = fread($this->socket, 6);
             // check the PDU type
-            if ($data && ord($data{0}) == 0x4) {
+            if ($data && ord($data[0]) == 0x4) {
                 $array = unpack('Ctype/Cdummy/Nlength', $data);
 		        $pduLen = $array['length'];
                 $data = fread($this->socket, $pduLen);
@@ -3589,7 +3589,7 @@ class Association extends BaseObject {
         do {
             $data = fread($this->socket, 6);
             // check the PDU type
-            if ($data && ord($data{0}) == 0x4) {
+            if ($data && ord($data[0]) == 0x4) {
                 $array = unpack('Ctype/Cdummy/Nlength', $data);
 		        $pduLen = $array['length'];
                 $data = fread($this->socket, $pduLen);
@@ -3707,7 +3707,7 @@ class StructuredReport extends DicomObject {
 					$format = $this->convertEndian($ATTR_TBL[$key]->type);
 				else
 					$format = "A";
-				if (strcasecmp($format{0}, "A") == 0)
+				if (strcasecmp($format[0], "A") == 0)
 					$format .= $length;
 				$format .= 'value';
 				$array = unpack($format, $body);
@@ -4245,7 +4245,7 @@ class RawTags extends DicomObject {
                     $format = $this->convertEndian($ATTR_TBL[$key]->type);
                 else
                     $format = ($element == 0)? $this->convertEndian("V") : "A";
-                if (strcasecmp($format{0}, "A") == 0)
+                if (strcasecmp($format[0], "A") == 0)
                     $format .= $length;
                 $format .= 'value';
                 $body = substr($headers, $offset, $length);
@@ -4315,11 +4315,11 @@ class RawTags extends DicomObject {
                     $format = ($element == 0)? $this->convertEndian("V") : "A";
                 //print "Key = " . dechex($key) . " Length = $length Format = $format<br>";
                 if ( ($length == $UNDEF_LEN) ||
-                     (strcasecmp($format{0}, "S") == 0) ) {     // sequence elements
+                     (strcasecmp($format[0], "S") == 0) ) {     // sequence elements
                     $this->attrs[$key] = new Sequence($key, strlen($body), $body, false, $this->bigEnd);
                     $length = $this->attrs[$key]->getLength();
                 } else {
-                    if (strcasecmp($format{0}, "A") == 0)
+                    if (strcasecmp($format[0], "A") == 0)
                         $format .= $length;
                     $format .= 'value';
                     $array = unpack($format, $body);
@@ -4377,13 +4377,13 @@ class RawTags extends DicomObject {
                     $format = ($element == 0)? $this->convertEndian("V") : "A";
                 //print "Key = " . dechex($key) . " Length = $length Format = $format<br>";
                 if ( ($length == $UNDEF_LEN) || strcasecmp($vr, "SQ") == 0 ||
-                     (strcasecmp($format{0}, "S") == 0) ) {     // sequence elements
+                     (strcasecmp($format[0], "S") == 0) ) {     // sequence elements
                     if ($length == $UNDEF_LEN)
                         $length = strlen($body);
                     $this->attrs[$key] = new Sequence($key, $length, $body, true, $this->bigEnd);
                     $length = $this->attrs[$key]->getLength();
                 } else {
-                    if (strcasecmp($format{0}, "A") == 0)
+                    if (strcasecmp($format[0], "A") == 0)
                         $format .= $length;
                     $format .= 'value';
                     $array = unpack($format, $body);
@@ -4429,7 +4429,7 @@ class RawTags extends DicomObject {
                 $value = "Sequence";
             else {
                 $value = trim($attr["value"]);
-                if ($format{0} == 'A')
+                if ($format[0] == 'A')
                     $value = str_replace("^", " ", $value);
             }
             print "<tr><td>$key</td>";

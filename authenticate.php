@@ -70,6 +70,9 @@ if (isset($ini['Schema']))
     $_SESSION['Schema'] = $ini['Schema'];
 if (isset($ini['DatabaseHost']))
     $hostname = $ini['DatabaseHost'];
+
+echo("authenticate.php-74-".$action);
+
 if (strcasecmp($action, "signup") == 0) {
     $url = "userSignup.php?hostname=" . urlencode($hostname) . "&database=" . urlencode($database);
     header("Location: $url");
@@ -86,15 +89,19 @@ if (strstr($user, "..") || strstr($user, "/")) {
 $timestamp = null;
 $attempts = getLoginAttempts($user, $timestamp);
 $timestamp = time() - $timestamp;
-if (($attempts >= $MAX_LOGIN_ATTEMPTS) && ($timestamp < $LOCKOUT_HOURS * 3600)) {
-    print "<p><h3><font color=red>";
-    printf(pacsone_gettext("You have been locked out because you have reached the maximum allowed %d login attempts."), $MAX_LOGIN_ATTEMPTS);
-    print "<p>";
-    printf(pacsone_gettext("Please reconnect in %d hours again."), $LOCKOUT_HOURS);
-    print "</font></h3>";
-    exit();
-}
+// if (($attempts >= $MAX_LOGIN_ATTEMPTS) && ($timestamp < $LOCKOUT_HOURS * 3600)) {
+//     print "<p><h3><font color=red>";
+//     printf(pacsone_gettext("You have been locked out because you have reached the maximum allowed %d login attempts."), $MAX_LOGIN_ATTEMPTS);
+//     print "<p>";
+//     printf(pacsone_gettext("Please reconnect in %d hours again."), $LOCKOUT_HOURS);
+//     print "</font></h3>";
+//     exit();
+// }
 $password = urldecode($_POST["formPassword"]);
+
+
+echo("authenticate.php-100-".$user."-".$password);
+
 $antispaminput = urldecode($_POST["formAntiSpam"]);
 $dbcon = new MyDatabase($hostname, $database, $user, $password, $aetitle);
 $err = "";
@@ -115,6 +122,7 @@ if (!$dbcon->isAdministrator($user) && isset($ini['LdapHost'])) {
 }
 
 ob_start();
+
 if ( isset($antispaminput) AND
      ($antispaminput == $_SESSION['antispamcode']) AND $loggedIn ) 
 {
@@ -130,6 +138,9 @@ if ( isset($antispaminput) AND
             $allow = false;
         }
     }
+
+    echo("authenticate.php-134-".$allow);
+
     if ($allow) {
         // log activity to system journal
         $value = get_client_ip();
