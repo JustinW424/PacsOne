@@ -30,7 +30,7 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
     for ($count = 0; ($count < $page) && ($count < $total) && (($count + $offset) < $total); $count++) {
         $rows[] = $list[$offset+$count];
     }
-    print "<table class=\"table\" width=100% cellpadding=0 cellspacing=0 border=0>\n";
+    print "<table class=\"table\" style='width:100%; margin-bottom:0px'>\n";
     print "<tr><td>$preface</td>\n";  
     //print "<tr><td colspan=2><br></td></tr>\n";
      print "<td align=right>\n";
@@ -49,18 +49,19 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
         $start = ($total)? ($offset+1) : 0;
         printf(pacsone_gettext("Displaying %d-%d of %d %s:"), $start, $count+$offset, $total, $what);
         print "</td></tr>\n";
+    print "</table>\n";
     
     if ($total) {
         // display Previous, Next and Page Number links
-        print "<tr><td align=left>\n";
+        $pagination_html = "";
         $and = (strrpos($url, "?") == false)? "?" : "&";
         $previous = $offset - $page;
         if ($offset > 0) {
-            print "<a href=\"$url" . $and . "offset=" . urlencode($previous) . "\">";
-            print pacsone_gettext("Previous");
-            print "</a> ";
+            $pagination_html .= "<a href=\"$url" . $and . "offset=" . urlencode($previous) . "\">";
+            $pagination_html .= pacsone_gettext("Previous");
+            $pagination_html .= "</a> ";
         } else {
-            print pacsone_gettext("Previous ");
+            $pagination_html .= pacsone_gettext("Previous ");
         }
         if ($total > $page) {
             $start = $offset - 10 * $pageSize;
@@ -71,36 +72,42 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
                 $end = $total;
             for ($i = $start, $p = ($i / $pageSize + 1); $i < $end; $i += $page, $p++) {
                 if ($i < $offset || $i > ($offset+$page-1))
-                    print "<a href=\"$url" . $and . "offset=" . urlencode($i) . "\">$p</a> ";
+                    $pagination_html .= "<a href=\"$url" . $and . "offset=" . urlencode($i) . "\">$p</a> ";
                 else
-                    print "$p ";
+                    $pagination_html .= "$p ";
             }
         }
         $next = $offset + $page;
         if ($total > $next) {
-            print "<a href=\"$url" . $and . "offset=" . urlencode($next) . "\">";
-            print pacsone_gettext("Next");
-            print "</a> ";
+            $pagination_html .= "<a href=\"$url" . $and . "offset=" . urlencode($next) . "\">";
+            $pagination_html .= pacsone_gettext("Next");
+            $pagination_html .= "</a> ";
         } else {
-            print pacsone_gettext("Next ");
+            $pagination_html .= pacsone_gettext("Next ");
         }
-       print "</tr>\n";
     }
-    print "</table><br>\n";
+
     $url = urlReplace($url, "all", $all);
-    return $rows;
+    $data = array();
+    $data["rows"] = $rows;
+    $data["pagination"] = $pagination_html;
+    return $data;
 }
 
-function displayButtons($level, &$buttons, $hidden, $checkButton = 1)
+function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $pagination)
 {
     // add by rina  2021.11.06
     
-    print "<div class=\"btn-group\" style='width:100%;'>\n";
+    print "<table class='table' style='width:100%; margin-bottom:0px'>
+            <tr>
+            <td style='width:62%'>\n";
+    print "<div class=\"btn-group\">\n";
 
     $check = pacsone_gettext("Check All");
     $uncheck = pacsone_gettext("Uncheck All");
     print "<input type='hidden' name='actionvalue'>\n";
     $ajaxButton = false;
+    
     if ($checkButton)
         print "<input type=\"button\" class=\"btn btn-primary\" value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></button>\n";
 
@@ -140,9 +147,11 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1)
             print $line;
         }
     }
-
-    print "<input class='form-control' style='float:right; width:20%' id='myInput' type='text' placeholder='Search..'>\n";
-    print "</div>\n";
+    print "</div></td>
+            <td style='line-height:30px'>
+            $pagination</td>\n";
+    print "<td style='float:right'><input class='form-control' id='myInput' type='text' placeholder='Search..'></td>\n";
+    print "</tr></table>\n";
     
 
     /*
@@ -838,7 +847,10 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     $result = $dbcon->query("select skipseries from config");
     if ($result && ($row = $result->fetch(PDO::FETCH_NUM)))
         $skipSeries = $row[0];
-    $rows = displayPageControl(pacsone_gettext("Studies"), $list, $preface, $url, $offset, $all);
+    
+    $data = displayPageControl(pacsone_gettext("Studies"), $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"];
+    $pagination = $data["pagination"];
     // check user privileges
     $checkbox = 0;
 	$username = $dbcon->username;
@@ -903,7 +915,7 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
         $text = $filtersEnabled? pacsone_gettext("Hide Filters") : pacsone_gettext('Show Filters');
         $buttons['Show Filters'] = array($text, pacsone_gettext('Toggle display of filter settings for study view pages'), $viewAccess);
     }
-    displayButtons("study", $buttons, null, sizeof($rows)); // ----------------------------
+    displayButtons("study", $buttons, null, sizeof($rows), $pagination); // ----------------------------
     
     // check if need to toggle sorting order
     if (isset($_SESSION['sortToggle'])) {

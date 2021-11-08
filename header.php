@@ -187,9 +187,7 @@ print "<div style=\"width:100%;\">\n";
             print "<td style='text-align:center'>\n";
                 print "<div class = \"btn\">\n";
                     $dir = dirname($_SERVER["SCRIPT_FILENAME"]);
-                    if (file_exists("$dir/smallLogo.jpg")) {
-                        print "<a href='home.php'><img id='smallLog_img' src=\"smallLogo.jpg\" alt=\"logo\"></a>\n";
-                    } 
+                        print "<a href='home.php'><img id='largeLog_img' src=\"assets/img/largeLogo.jpg\" alt=\"logo\"></a>\n";
                 print "</div>\n";
             print "</td>\n";
             print "<td>\n";
