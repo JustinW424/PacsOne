@@ -54,14 +54,26 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
     if ($total) {
         // display Previous, Next and Page Number links
         $pagination_html = "";
+        $pagination_html .= "<nav class='pagination-outer' aria-label='Page navigation'>
+                                <ul class='pagination' style='margin:0px'>\n";
         $and = (strrpos($url, "?") == false)? "?" : "&";
         $previous = $offset - $page;
         if ($offset > 0) {
-            $pagination_html .= "<a href=\"$url" . $and . "offset=" . urlencode($previous) . "\">";
-            $pagination_html .= pacsone_gettext("Previous");
-            $pagination_html .= "</a> ";
+            $pagination_html .= "<li class='page-item'>
+                                    <a class='page-link' href=\"$url" . $and . "offset=" . urlencode($previous) . "\" aria-label='Previous'>
+                                        <span aria-hidden='true'>«</span>
+                                    </a>
+                                 </li>\n";
+
+            // $pagination_html .= pacsone_gettext("Previous");
+            // $pagination_html .= "</a> ";
         } else {
-            $pagination_html .= pacsone_gettext("Previous ");
+            // $pagination_html .= pacsone_gettext("Previous ");
+            $pagination_html .= "<li class='page-item'>
+                                    <a class='page-link' aria-label='Previous'>
+                                        <span aria-hidden='true'>«</span>
+                                    </a>
+                                 </li>\n";
         }
         if ($total > $page) {
             $start = $offset - 10 * $pageSize;
@@ -72,18 +84,24 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
                 $end = $total;
             for ($i = $start, $p = ($i / $pageSize + 1); $i < $end; $i += $page, $p++) {
                 if ($i < $offset || $i > ($offset+$page-1))
-                    $pagination_html .= "<a href=\"$url" . $and . "offset=" . urlencode($i) . "\">$p</a> ";
+                    $pagination_html .= "<li class='page-item'><a class='page-link' href=\"$url" . $and . "offset=" . urlencode($i) . "\">$p</a></li>";
                 else
-                    $pagination_html .= "$p ";
+                    $pagination_html .= "<li class='page-item active'><a class='page-link' href=\"$url" . $and . "offset=" . urlencode($i) . "\">$p</a></li>";
             }
         }
         $next = $offset + $page;
         if ($total > $next) {
-            $pagination_html .= "<a href=\"$url" . $and . "offset=" . urlencode($next) . "\">";
-            $pagination_html .= pacsone_gettext("Next");
-            $pagination_html .= "</a> ";
+            $pagination_html .= "<li class='page-item'>
+                                    <a class='page-link' href=\"$url" . $and . "offset=" . urlencode($next) . "\" aria-label='Next'>
+                                        <span aria-hidden='true'>»</span>
+                                    </a>
+                                </li>\n";
         } else {
-            $pagination_html .= pacsone_gettext("Next ");
+            $pagination_html .= "<li class='page-item'>
+                                    <a class='page-link' aria-label='Next'>
+                                        <span aria-hidden='true'>»</span>
+                                    </a>
+                                </li>\n";
         }
     }
 
@@ -98,9 +116,14 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
 {
     // add by rina  2021.11.06
     
-    print "<table class='table' style='width:100%; margin-bottom:0px'>
-            <tr>
-            <td style='width:62%'>\n";
+    print "<table class='table' style='width:100%; margin-bottom:0px'>\n";
+            print "<tr>\n";
+            print "<td style='width:50px;'>\n";
+                print "<img src=\"../assets/img/R.png\" width='50px' height='50px' alt=\"Expand Buttons\">\n";
+            print "</td>\n";
+
+            print "<td style='width:62%'>\n";
+
     print "<div class=\"btn-group\">\n";
 
     $check = pacsone_gettext("Check All");
@@ -109,14 +132,14 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
     $ajaxButton = false;
     
     if ($checkButton)
-        print "<input type=\"button\" class=\"btn btn-primary\" value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></button>\n";
+        print "<input type=\"button\" class=\"btn dicomButtonBG\" value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></input>\n";
 
     foreach ($buttons as $key => $values) {
         $text = $values[0];
         $title = $values[1];
         $access = $values[2];
         if ($access) {
-            $line = "<input type=\"submit\"  class=\"btn btn-primary\" value='$text' name='action' title='$title' ";
+            $line = "<input type=\"submit\"  class=\"btn dicomButtonBG\" value='$text' name='action' title='$title' ";
             // applet-specific pre-Show handler
             if (strcasecmp($key, "Show") == 0) {
                 require "applet.js";
@@ -129,7 +152,7 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
                 print "<input type='hidden' name='confirm' value='$confirm'>\n";
             }
             if (strcasecmp($key, "Show Filters") == 0) {
-                $line = "<input type=\"button\" class=\"btn btn-primary\" value='$text' id='filterButton' title='$title' ";
+                $line = "<input type=\"button\" class=\"btn dicomButtonBG\" value='$text' id='filterButton' title='$title' ";
                 $show = pacsone_gettext("Show Filters");
                 $hide = pacsone_gettext("Hide Filters");
                 $handler = "toggleFilter(this.form, \"$show\", \"$hide\");return false;";
@@ -139,7 +162,7 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
                     $className = strcasecmp($key, "Download")? "ajaxbuttonJPG" : "ajaxbuttonDicom";
                 else
                     $className = "ajaxbuttonDelete";
-                $line = "<input type=\"button\" class=\"btn btn-primary\" value='$text' title='$title' class='$className' ";
+                $line = "<input type=\"button\" class=\"btn dicomButtonBG\" value='$text' title='$title' class='$className' ";
                 $ajaxButton = true;
             }
             $line .= "onclick='$handler'>\n";
@@ -147,8 +170,7 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
         }
     }
     print "</div></td>
-            <td style='line-height:30px'>
-            $pagination</td>\n";
+            <td>$pagination</td>\n";
     print "<td style='float:right'><input class='form-control' id='myInput' type='text' placeholder='Search..'></td>\n";
     print "</tr></table>\n";
     
@@ -537,7 +559,7 @@ function showFilter_Rina($pfiltersEnabled, $pfilters, $peurodate)
 
         print "<table class=\"table\" style=\"width:100%;\">\n";
             print "<thead>\n";
-                print "<tr class=\"success\"> \n";
+                print "<tr class=\"tableHeadForBGUp\"> \n";
                     print "<th>".pacsone_gettext("Study Status")."</th>\n";
                     print "<th>".pacsone_gettext("Show Studies From:")."</th>\n";
                     print "<th>".pacsone_gettext("Filter By:")."</th>\n";
@@ -547,7 +569,7 @@ function showFilter_Rina($pfiltersEnabled, $pfilters, $peurodate)
 
             print "<tbody>\n";
                 // filter table contents --------------------------------------------
-            print "<tr class=\"active\">\n";
+            print "<tr style=\"background-color:#FFFFFFFF;\">\n"; //print "<tr class=\"active\">\n";
             // study status column
             print "<td>";
 
@@ -649,7 +671,7 @@ function showFilter_Rina($pfiltersEnabled, $pfilters, $peurodate)
                 print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_READING_DOC $checked>&nbsp;";
                 print $CUSTOMIZE_READING_DOC;
                 $value = isset($pfilters['readdoc'])?$pfilters['readdoc'] : "";
-                printf("&nbsp;<input type=text name='readdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+                printf("&nbsp;<input style=\"margin-left:1px;\" type=text name='readdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
                 $checked = ($filterBy & $STUDY_FILTER_BY_DATE_RECEIVED)? "checked" : "";
                 print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_DATE_RECEIVED $checked>&nbsp;";
                 print pacsone_gettext("Date When Study Was Received");
@@ -692,7 +714,7 @@ function showFilter_Rina($pfiltersEnabled, $pfilters, $peurodate)
 
             // filters buttons-------------------------------------------------------------
 
-            print "<tr class=\"danger\">\n";
+            print "<tr class=\"tableHeadForBGDown\">\n";
                 print "<td colspan=2 align='left' style=\"border:0\">";
                 $value = pacsone_gettext("Clear Filters");
                 $title = pacsone_gettext("Clear Filter Settings");
@@ -4474,7 +4496,7 @@ function displayNotes($table, &$rows, $username, $url, $checkbox, $showExtra)
     print "<p><table class=\"table table-bordered  table-striped\" width='100%' border=0 cellpadding=2 cellspacing=0>\n";
 
     //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
-    print "<tr class=\"danger\">\n"; // -------------------
+    print "<tr class=\"tableHeadForBGUp\">\n"; // -------------------
 
     if ($modifyAccess && $checkbox)
         print "<td>&nbsp;</td>";
@@ -4508,7 +4530,7 @@ function displayNotes($table, &$rows, $username, $url, $checkbox, $showExtra)
                 die("<font color=red>" . pacsone_gettext("Failed to find Study UID!") . "</font>");
             $studyUid = $result->fetchColumn();
         }
-        print "<tr class=\"info\">\n"; // ----------------------- for tr ----------------
+        print "<tr class=\"default\">\n"; // ----------------------- for tr ----------------
         if (($modifyAccess || $download) || $modifyNote) {
             $count++;
             if ($checkbox) {

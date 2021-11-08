@@ -87,8 +87,8 @@ if (!$num_rows && !strlen($filters)) {
             $rows[] = $row;
             $count++;
         }
-        if ($count > 10)
-            break;
+        // if ($count > 10)
+        //     break;
     }
     $num_rows = sizeof($rows);
     if ($num_rows) {

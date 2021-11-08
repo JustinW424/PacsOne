@@ -595,7 +595,7 @@ function addEntryForm(&$username, &$patientId, &$uid)
     
     print "<td>";
     // Add Study Note form
-    print "<table class=\"table\" border=0 cellpadding=2 cellspacing=5>\n";
+    print "<table class=\"table tableHeadForBGDown\" border=0 cellpadding=2 cellspacing=5>\n";
     print "<form onSubmit='return checkHeadline(this.headline);' method='POST' action='studyNotes.php' enctype='multipart/form-data'>\n";
     print "<input type='hidden' name='studynoteaction'>\n";
     print "<input type=hidden name='MAX_FILE_SIZE' value=$maxupload>\n";
@@ -826,7 +826,7 @@ function modifyEntryForm(&$username, &$patientId, &$uid)
         $notes = $row[1];
     }
     // Modify Study Note form
-    print "<table class=\"table\" border=0 cellpadding=2 cellspacing=5>\n";
+    print "<table class=\"table tableHeadForBGDown\" border=0 cellpadding=2 cellspacing=5>\n";
     print "<form onSubmit='return checkHeadline(this.headline);' method='POST' action='studyNotes.php' enctype='multipart/form-data'>\n";
     print "<input type='hidden' name='studynoteaction'>\n";
     print "<input type=hidden name='MAX_FILE_SIZE' value=$maxupload>\n";
@@ -1147,7 +1147,7 @@ function viewNotesForm(&$username, &$patientId, &$uid)
         $count = displayNotes("studynotes", $rows, $username, "studyNotes.php", 1, 0);
     }
 
-    print "<p><table width=60% border=0 cellspacing=0 cellpadding=5>\n";
+    print "<p><table width=100% border=0 cellspacing=0 cellpadding=5>\n";
     print "<tr>\n";
     if ($count) {
         $check = pacsone_gettext("Check All");
