@@ -111,7 +111,6 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
     if ($checkButton)
         print "<input type=\"button\" class=\"btn btn-primary\" value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></button>\n";
 
-
     foreach ($buttons as $key => $values) {
         $text = $values[0];
         $title = $values[1];
@@ -963,7 +962,10 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     
  print "<table class=\"table table-hover  table-bordered  table-striped\" style=\"margin-bottom: 0px;\">\n";  // attatch the bottom btn group without gap.=>margin-bottom: 0px;
     print "<thead>\n";
-      print "<tr class=\"Info\">\n";
+    
+    //print "<tr class=\"Info\">\n";
+    
+    print "<tr>\n";
 
         if ($checkbox) {
             print "\t<th></th>\n";
