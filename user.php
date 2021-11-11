@@ -30,6 +30,7 @@ class SingleInstancePage extends TabbedPage {
     function __destruct() { }
     function showHtml() {
         // check if the internal username/password has been created for local database
+
         $result = $this->dbcon->query("SELECT * FROM privilege WHERE firstname!='_GROUP'");
         $num_rows = $result->rowCount();
         // display total number of patient records in database
@@ -71,6 +72,7 @@ class MultiInstancePage extends TabbedPage {
     }
     function __destruct() { }
     function showHtml() {
+
         print "<form method='POST' action='multiInstanceUser.php'>\n";
         print "<p><table border=0 cellpadding=2 cellspacing=0>\n";
         print "<tr><td>";
@@ -122,9 +124,11 @@ $pages = array(
     (new SingleInstancePage($dbcon)),
 );
 $instances = getServerInstances();
+
 if (count($instances) > 1)
     $pages[] = new MultiInstancePage($dbcon, $instances);
 $current = $pages[$type]->title;
+
 $tabs = new tabs($pages, $current);
 $tabs->showHtml();
 

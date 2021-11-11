@@ -101,6 +101,9 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
     border-color: #4e4e4e;
 }
 .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
-    background-color: #FFA07A;
+    
+     background-color: white;
+    background-image: linear-gradient(white, #95AFCAFF);
+
     border-color: #4e4e4e;
 }

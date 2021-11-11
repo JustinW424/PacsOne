@@ -55,7 +55,7 @@ class ExportPage extends TabbedPage {
         $exportdir = $this->directory;
         print "<form method=POST action='exportStudy.php'><p>\n";
         displayExportForm("Study", $exportdir);
-        print "<br><input type=submit value='";
+        print "<br><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Export Studies");
         print "' title='";
         print pacsone_gettext("Export Selected Studies");
@@ -98,10 +98,10 @@ class ImportPage extends TabbedPage {
             $size = 16;
         }
         $value = strlen($this->drive)? $this->drive : $value;
-        print "<input type=text name='drive' size=$size maxlength=64 value='$value'></input>";
+        print "<input style='margin-left:113px;' type=text name='drive' size=$size maxlength=64 value='$value'></input>";
         print pacsone_gettext(" to destination archive directory:") . "<br>";
         $value = strlen($this->dest)? $this->dest : "";
-        print "<input type=text name='destdir' size=64 maxlength=256 value='$value'></input><br>";
+        print "<input style='margin-left:405px;' type=text name='destdir' size=64 maxlength=256 value='$value'></input><br>";
         print "<p>";
         print "<input type=radio name='all' value=1 checked>";
         global $CUSTOMIZE_PATIENTS;
@@ -110,7 +110,7 @@ class ImportPage extends TabbedPage {
         print "<input type=radio name='all' value=0>";
         printf(pacsone_gettext("Select a list of %s to import"), $CUSTOMIZE_PATIENTS);
         print "</input><br>";
-        print "<br><input type=submit value='";
+        print "<br><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Import Studies");
         print "' title='";
         print pacsone_gettext("Import External Studies");
@@ -144,11 +144,11 @@ class StatisticsPage extends TabbedPage {
         print pacsone_gettext("Report on studies received from:") . " </input>";
         $euro = $this->dbcon->isEuropeanDateFormat();
         $pattern = ($euro)? pacsone_gettext("DD-MM-YYYY") : pacsone_gettext("YYYY-MM-DD");
-        print "<input type=text name='from'> ($pattern)</input>";
+        print "<input style='margin-left:100px;' type=text name='from'> ($pattern)</input>";
         print "<input type=text name='to'> ($pattern)</input><br>";
         print "<input type=radio name='type' value=5>";
         print pacsone_gettext("Report on studies received from this source AE:") . "</input>";
-        print " <input type=text name='sourceae'><br>";
+        print " <input style='margin-left:6px;' type=text name='sourceae'><br>";
         print "<input type=radio name='type' value=6>";
         $url = "applentity.php";
         printf(pacsone_gettext("Report on studies received from each source AE defined in <a href=\"%s\">Dicom AE</a> page"), $url) . "</input><br>";
@@ -161,7 +161,7 @@ class StatisticsPage extends TabbedPage {
         if ($result && $result->rowCount()) {
             print "<br><input type=radio name='type' value=8>";
             print pacsone_gettext("Report on studies reviewed by this web user: ");
-            print "<select name='reviewer'>";
+            print "<select style='margin-left:61px;' name='reviewer'>";
             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                 $user = $row['username'];
                 $first = $row['firstname'];
@@ -171,7 +171,7 @@ class StatisticsPage extends TabbedPage {
             }
             print "</select>";
         }
-        print "<p><input type=submit value='";
+        print "<p><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Get Report");
         print "' title='";
         print pacsone_gettext("Get Statistics Report");
@@ -232,15 +232,15 @@ class UploadImagePage extends TabbedPage {
         require_once "checkUncheck.js";
         print "<form method='POST' action='uploadImage.php' enctype='multipart/form-data'>\n";
         print "<input type='hidden' name='actionvalue'>\n";
-        print "<p><table border=0 cellpadding=0 cellspacing=5>\n";
-        print "<tr><td width='20%'>";
+        print "<p><table class='table table-striped table-bordered' border=0 cellpadding=0 cellspacing=5>\n";
+        print "<tr class='tableHeadForBGUp'><td width='20%'>";
         printf(pacsone_gettext("Upload client Dicom Part-10 formatted raw images to %s"), $PRODUCT);
         print "</td>";
-        print "</td>";
-        print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
-        print "<td>";
-        print "<td width='80%'><input type=file name='uploadfile' size=64 maxlength=255>\n";
-        print "<p><input type=submit name='action' value='";
+        //print "</td>";
+        //print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
+        //print "<td>";
+        print "<td width='80%'><div class='form-group'><input class='filestyle' type=file name='uploadfile' size=64 maxlength=255></div>\n";
+        print "<p><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Attach");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Attach\")'>";
         // display any uploaded images here
@@ -254,14 +254,14 @@ class UploadImagePage extends TabbedPage {
                     print "<img src='attachment.gif' border=0>";
                     print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
                 }
-                print "<br><input type=submit name='action' value='";
+                print "<br><input class='btn btn-primary' type=submit name='action' value='";
                 print pacsone_gettext("Unattach");
                 print "' onclick='switchText(this.form,\"actionvalue\",\"Unattach\")'>\n";
             }
         }
         print "</input></td></tr>\n";
         print "</table>\n";
-        print "<p><input type=submit name='action' value='";
+        print "<p><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Upload");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Upload\")'>";
         print "</form>\n";
@@ -292,7 +292,7 @@ class IntegrityCheckPage extends TabbedPage {
         print "<p><input type='checkbox' name='parallel'>&nbsp;";
         print pacsone_gettext("Run integrity check using <input type='text' name='threads' size=2 maxlength=2 value='5'> threads simultaneously");
         print pacsone_gettext(" (This will make the integrity check run faster but will require more memory resource)");
-        print "<p><input type=submit name='action' value='";
+        print "<p><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Integrity Check");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Integrity Check\")'>";
         print "</form>\n";
@@ -314,15 +314,15 @@ class ImportWorklistPage extends TabbedPage {
         require_once "checkUncheck.js";
         print "<form method='POST' action='importWorklist.php' enctype='multipart/form-data'>\n";
         print "<input type='hidden' name='actionvalue'>\n";
-        print "<p><table border=0 cellpadding=0 cellspacing=5>\n";
-        print "<tr><td width='20%'>";
+        print "<p><table class='table table-striped table-bordered' border=0 cellpadding=0 cellspacing=5>\n";
+        print "<tr class='tableHeadForBGUp'><td width='20%'>";
         printf(pacsone_gettext("Upload Modality Worklist from Text File(s) to %s"), $PRODUCT);
         print "</td>";
-        print "</td>";
-        print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
-        print "<td>";
-        print "<td width='80%'><input type=file name='uploadfile' size=64 maxlength=255>\n";
-        print "<p><input type=submit name='action' value='";
+        //print "</td>";
+        //print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
+        //print "<td>";
+        print "<td width='80%'><div class='form-group'><input class='filestyle' type=file name='uploadfile' size=64 maxlength=255></div>\n";
+        print "<p><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Import Worklist");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Import Worklist\")'>";
         print "</input></td></tr>\n";
@@ -529,7 +529,7 @@ class CompressDatabasePage extends TabbedPage {
         print pacsone_gettext("Note: since the lossless compression will be applied to all Dicom images stored in the database, it may take quite some time as well as CPU/memory resources for the compression to be completed depending on the size of the existing database. ");
         print pacsone_gettext("So please run this tool only during <u>off-hours</u>, e.g., night or weekends, etc, in order to have minimum impact on the normal workflows during the regular business hours.");
         print "</b>";
-        print "<p><input type=submit name='action' value='";
+        print "<p><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Compress Database");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Compress Database\")'>";
         print "</form>\n";

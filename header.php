@@ -55,12 +55,16 @@ function BuildModal($pdbcon, $pusername, $pview, $pmodify, $pquery)
     
       //<!-- Modal content-->
       print "<div class=\"modal-content\">\n";
-        print "<div class=\"modal-body menuPopUpItem\" >\n";
-          //print "<p>Some text in the modal.</p>\n";  ---------------  put here custom item ----
+
+        print "<div class=\"modal-body\" style=\"background-color:#95AFCA2F;\">\n";
+          
+        //print "<p>Some text in the modal.</p>\n";  ---------------  put here custom item ----
 
         //$prev = "<button type=\"button\" style=\"background-color:#95AFCA2F; font-weight:1000; width:100%;box-shadow: 1px 2px 5px #95AFCA8F;text-shadow: 1px 1px 2px black, 0 0 1em blue, 0 0 0.2em darkblue;color: white;font-size: 15px;\" class=\"btn btn-lg\" onclick=\"window.location.assign('";
 
-          $prev = "<button type=\"button\" class=\"btn menuPopUpItem\" onclick=\"window.location.assign('";
+        $prev = "<button type=\"button\" style=\"background-color:#95AFCA2F; font-weight:1000; width:100%;box-shadow: 1px 2px 5px #95AFCA8F;text-shadow: 1px 1px 2px black;color: white;font-size: 15px;\" class=\"btn btn-lg\" onclick=\"window.location.assign('";
+
+          //$prev = "<button type=\"button\" class=\"btn menuPopUpItem\" onclick=\"window.location.assign('";
 
           $middle = "')\">";
           $end = "</button>\n";

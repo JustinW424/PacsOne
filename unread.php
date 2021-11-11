@@ -64,6 +64,7 @@ if (isset($_REQUEST['all']))
 
 $preface = sprintf(pacsone_gettext("There are %d unread studies: <b>%s</b>"), $num_rows, date("l F jS Y"));
 $preface .= "<br>";
+
 displayStudies($rows, $preface, $url, $offset, 1, $all);
 
 require_once 'footer.php';

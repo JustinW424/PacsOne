@@ -280,7 +280,7 @@ function addEntryForm()
         $seq = $_POST['sequence'] + 1;
     print "<td><input type='text' size=4 maxlength=4 name='sequence' value=$seq></td></tr>\n";
     print "</table>\n";
-    print "<p><input type='submit' name='action' value='";
+    print "<p><input class='btn btn-primary' type='submit' name='action' value='";
     print pacsone_gettext("Add");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Add\")'></form>\n";
 	require_once 'footer.php';
@@ -365,7 +365,7 @@ function modifyEntryForm($title, $seq)
         $value = "<input type=hidden name='sequence' value='$data'>\n";
         print $value;
         print "</table>\n";
-        print "<p><input type='submit' name='action' value='";
+        print "<p><input class='btn btn-primary' type='submit' name='action' value='";
         print pacsone_gettext("Modify");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Modify\")'>\n";
         print "</form>\n";

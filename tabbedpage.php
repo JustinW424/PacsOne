@@ -29,7 +29,29 @@ class Tabs extends PacsOneRoot {
 	}
     function __destruct() { }
     function showHtml() {
-        print "<p><div class=\"rounded-tab\">";
+        
+        print "<p><div>";
+        print "<ul class=\"nav nav-tabs\">";
+        foreach ($this->pages as $page) {
+            $title = $page->title;
+            $url = $page->url;
+            if (!strcasecmp($this->current, $title)) {
+                $current = $page;
+                print "<li class=\"active\"><a href='$url'><span>$title</span></a></li>\n";
+            } else {
+                print "<li><a href='$url'><span>$title</span></a></li>\n";
+            }
+        }
+        print "</ul></div>";
+
+        print "<div class=\"tabbed-box\">";
+        if (!$current)
+            debug_print_backtrace();
+        
+        $current->showHtml();
+        print "</div><p>";
+
+        /*print "<p><div class=\"rounded-tab\">";
         print "<ul>";
         foreach ($this->pages as $page) {
             $title = $page->title;
@@ -46,7 +68,7 @@ class Tabs extends PacsOneRoot {
         if (!$current)
             debug_print_backtrace();
         $current->showHtml();
-        print "</div><p>";
+        print "</div><p>";*/
     }
 }
 

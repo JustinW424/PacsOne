@@ -811,7 +811,7 @@ function addEntryForm($mpps)
         print "</td></tr>\n";
     }
     print "</table>\n";
-    print "<p><input type='submit' name='action' value='";
+    print "<p><input class='btn btn-primary' type='submit' name='action' value='";
     print pacsone_gettext("Add");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Add\")'></form>\n";
 	require_once 'footer.php';
@@ -1092,7 +1092,7 @@ function modifyEntryForm($source, $destination, $keytag, $window, $pattern, $wee
             print "</td></tr>\n";
         }
         print "</table>\n";
-        print "<p><input type='submit' value='";
+        print "<p><input class='btn btn-primary' type='submit' value='";
         print pacsone_gettext("Modify");
         print "'>\n";
         print "</form>\n";

@@ -22,9 +22,14 @@ global $CUSTOMIZE_PATIENT;
 $dbcon = new MyConnection();
 $username = $dbcon->username;
 $action = $_POST['action'];
+
 if (isset($_POST['actionvalue']))
     $action = $_POST['actionvalue'];
-$option = $_POST['option'];
+
+if(isset($_POST['option']))
+    $option = $_POST['option'];
+
+
 if (stristr($action, "Clear Filters") || stristr($action, "Apply Filters")) {
     // clear all study filters defined by this user
     $query = "delete from studyfilter where username=?";
@@ -135,7 +140,10 @@ if (stristr($action, "Clear Filters") || stristr($action, "Apply Filters")) {
     header("Location: $url");
     exit;
 }
-$entry = $_POST['entry'];
+
+if(isset($_POST['entry']))
+    $entry = $_POST['entry'];
+
 if (!isset($entry) || count($entry) == 0) {
     ob_end_flush();
     print "<h3><font color=red>" . pacsone_gettext("No item has been selected.") . "</font></h3>\n";
@@ -738,7 +746,7 @@ if (strcasecmp($action, "Export") == 0 && isset($option)) {
 	print "</body>\n";
 	print "</html>\n";
 }
-if (stristr($action, "Mark Study") && strcasecmp($option, "Study") == 0) {
+if (isset($option) && stristr($action, "Mark Study") && strcasecmp($option, "Study") == 0) {
     if (stristr($action, "Un-Read")) {
         $reviewed = "reviewed=NULL";
         $status = "status=$STUDY_STATUS_DEFAULT";

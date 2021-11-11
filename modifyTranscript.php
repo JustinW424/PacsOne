@@ -353,9 +353,9 @@ function addEntryForm(&$username, $mbytes)
     print pacsone_gettext("Upload Transcription Template Word Document: ");
     print pacsone_gettext("(This Word template will contain the following bookmarks)");
     print "</td>";
-    print "<td><input type=file name='attachfile' size=64 maxlength=255 $disabled>&nbsp;\n";
+    print "<td><input class='btn btn-primary' type=file name='attachfile' size=64 maxlength=255 $disabled>&nbsp;\n";
     printf(pacsone_gettext("(max %d Mbytes)"), $mbytes) . "\n";
-    print "<p><input type=submit name='action' value='";
+    print "<p><input class='btn btn-primary' type=submit name='action' value='";
     print pacsone_gettext("Attach");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Attach\")' $disabled><br>";
     // display any uploaded document here
@@ -369,7 +369,7 @@ function addEntryForm(&$username, $mbytes)
                 print "<img src='attachment.gif' border=0>";
                 print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
             }
-            print "<br><input type=submit name='action' value='";
+            print "<br><input class='btn btn-primary' type=submit name='action' value='";
             print pacsone_gettext("Unattach");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Unattach\")'>\n";
         }
@@ -388,7 +388,7 @@ function addEntryForm(&$username, $mbytes)
         print "</td></tr>\n";
     }
     print "</table>\n";
-    print "<p><input type='submit' name='action' value='";
+    print "<p><input class='btn btn-primary' type='submit' name='action' value='";
     print pacsone_gettext("Add");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Add\")'></form>\n";
 	require_once 'footer.php';
@@ -434,9 +434,9 @@ function modifyEntryForm($name, $mbytes)
     print "<td>";
     print pacsone_gettext("Current template document: ");
     print "<input type='text' size=128 maxlength=255 name='currentpath' value='$path' readonly>";
-    print "<p><input type=file name='attachfile' size=64 maxlength=255 $disabled>&nbsp;\n";
+    print "<p><input class='btn btn-primary' type=file name='attachfile' size=64 maxlength=255 $disabled>&nbsp;\n";
     printf(pacsone_gettext("(max %d Mbytes)"), $mbytes) . "\n";
-    print "<p><input type=submit name='action' value='";
+    print "<p><input class='btn btn-primary' type=submit name='action' value='";
     print pacsone_gettext("Attach");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Attach\")' $disabled><br>";
     // display any uploaded document here
@@ -450,7 +450,7 @@ function modifyEntryForm($name, $mbytes)
                 print "<img src='attachment.gif' border=0>";
                 print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
             }
-            print "<br><input type=submit name='action' value='";
+            print "<br><input class='btn btn-primary' type=submit name='action' value='";
             print pacsone_gettext("Unattach");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Unattach\")'>\n";
         }
@@ -473,7 +473,7 @@ function modifyEntryForm($name, $mbytes)
         print "</td></tr>\n";
     }
     print "</table>\n";
-    print "<p><input type='submit' name='action' value='";
+    print "<p><input class='btn btn-primary' type='submit' name='action' value='";
     print pacsone_gettext("Modify");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Modify\")'></form>\n";
 	require_once 'footer.php';

@@ -46,18 +46,134 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
             print pacsone_gettext("Paginate");
             print "</a>&nbsp;&nbsp;&nbsp;";
         }
-        $start = ($total)? ($offset+1) : 0;
+        $start = ($total)? ($offset+1) : 0;  
+
+        // $start : first record number to display  (base : 1)
+        // $offset: cur table's first record number  ( base: 0)
+        // $count : cur table's record Number.  ( <= page size)
+
         printf(pacsone_gettext("Displaying %d-%d of %d %s:"), $start, $count+$offset, $total, $what);
         print "</td></tr>\n";
     print "</table>\n";
     
-    if ($total) {
-        // display Previous, Next and Page Number links
+    // =================  first  <<  --------------------------------
+    
+    if ($total > 0 && !$all) {
+
         $pagination_html = "";
         $pagination_html .= "<nav class='pagination-outer' aria-label='Page navigation'>
                                 <ul class='pagination' style='margin:0px'>\n";
         $and = (strrpos($url, "?") == false)? "?" : "&";
         $previous = $offset - $page;
+
+        
+        // add by lina------------------------------------
+
+        // display first, Page Number links, last
+        
+        // first ------------  <<  ----------------------------------
+        $first = 0;
+        $pagination_html .= "<li class='page-item'>
+                                    <a class='page-link' href=\"$url" . $and . "offset=" . urlencode($first) . "\" aria-label='First'>
+                                        <span aria-hidden='true'><span style='margin-left: -3px;
+    margin-top: 4px;' class=\"fa fa-fast-backward\"></span></span>
+                                    </a>
+                                 </li>\n";
+
+        // Page Number Links  -- total cell is 5 ---------------------------
+        // --------------------- N-2, N-1, <N>, N+1, N+2 ---------------------
+
+        $AllPageNumber = (intval($total / $pageSize));
+        if($AllPageNumber * $pageSize < $total){
+            $AllPageNumber += 1;
+        }
+
+        $CurPageNumber = (intval($offset / $pageSize)) + 1;
+        
+        //print "curpageNum=".$CurPageNumber." all =". $AllPageNumber." total=".$total;
+        
+        $i = 0;
+        $startPageNum = 0;
+        $endPageNum = 0;
+        if($AllPageNumber <= 5)
+        {
+            for($i = 1; $i <= 5; $i++){
+                
+                if($i <= $AllPageNumber)
+                {
+
+                    $urlOff= ($i - 1)*$pageSize;
+                   if($i == $CurPageNumber)
+                   {
+                $pagination_html .= "<li class='page-item active'><a class='page-link' href=\"$url" . $and . "offset=" . urlencode($urlOff) . "\">$i</a></li>";
+                   }
+                   else
+                   {
+                 $pagination_html .= "<li class='page-item'><a class='page-link' href=\"$url" . $and . "offset=" . urlencode($urlOff) . "\">$i</a></li>";                   
+                   }
+
+                }
+                else
+                {
+                    $urlOff= ($AllPageNumber - 1)*$pageSize;
+                    $pagination_html .= "<li class='page-item'><a class='page-link' href=\"$url" . $and . "offset=" . urlencode($urlOff) . "\">-</a></li>";   
+                }
+
+            }
+        }else{
+
+            if($CurPageNumber <= 3 )
+            {
+                $startPageNum = 1; $endPageNum = 5;
+            }
+            else if(3 < $CurPageNumber && $CurPageNumber <= $AllPageNumber - 2)
+            {
+                $startPageNum = $CurPageNumber-2; $endPageNum = $CurPageNumber+2;
+            }
+            else
+            {
+                $startPageNum = $AllPageNumber-4; $endPageNum = $AllPageNumber;
+            }
+
+            for($i = $startPageNum; $i <= $endPageNum; $i++){
+                    
+                    $urlOff= ($i - 1)*$pageSize;
+                    
+                    $linkprop = "page-link";
+                    if($i > 9){
+                        $linkprop = "page-link-left-5";
+                    }
+
+                       if($i == $CurPageNumber)
+                       {
+                    $pagination_html .= "<li class='page-item active'><a class='".$linkprop."' href=\"$url" . $and . "offset=" . urlencode($urlOff) . "\">$i</a></li>";
+                       }
+                       else
+                       {
+                     $pagination_html .= "<li class='page-item'><a class='".$linkprop."' href=\"$url" . $and . "offset=" . urlencode($urlOff) . "\">$i</a></li>";                   
+                       }
+            }
+        }
+
+        // last page ----------  >>  ----------------------------------------
+
+        $last = intval($total / $pageSize);
+        $lastOffset = $last * $pageSize;
+        if($lastOffset >= $total)
+        {
+            $lastOffset -= $pageSize;
+        }
+        $pagination_html .= "<li class='page-item'>
+                                    <a class='page-link' href=\"$url" . $and . "offset=" . urlencode($lastOffset) . "\" aria-label='Last'>
+                                        <span aria-hidden='true'><span style='margin-left: -3px;
+    margin-top: 4px;' class=\"fa fa-fast-forward\"></span></span>
+                                    </a>
+                                </li>\n";
+
+
+        /*
+        // display Previous, Next and Page Number links
+        // previous ----------------------- << ----------------
         if ($offset > 0) {
             $pagination_html .= "<li class='page-item'>
                                     <a class='page-link' href=\"$url" . $and . "offset=" . urlencode($previous) . "\" aria-label='Previous'>
@@ -65,16 +181,18 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
                                     </a>
                                  </li>\n";
 
-            // $pagination_html .= pacsone_gettext("Previous");
-            // $pagination_html .= "</a> ";
+             //$pagination_html .= pacsone_gettext("Previous");
+             //$pagination_html .= "</a> ";
         } else {
-            // $pagination_html .= pacsone_gettext("Previous ");
+             //$pagination_html .= pacsone_gettext("Previous ");
             $pagination_html .= "<li class='page-item'>
                                     <a class='page-link' aria-label='Previous'>
                                         <span aria-hidden='true'>«</span>
                                     </a>
                                  </li>\n";
         }
+
+        // ------------------------- 1, 2, .. N ----------------------------------
         if ($total > $page) {
             $start = $offset - 10 * $pageSize;
             if ($start < 0)
@@ -89,6 +207,8 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
                     $pagination_html .= "<li class='page-item active'><a class='page-link' href=\"$url" . $and . "offset=" . urlencode($i) . "\">$p</a></li>";
             }
         }
+
+        // --------------------------  >>  -------------------------------------------
         $next = $offset + $page;
         if ($total > $next) {
             $pagination_html .= "<li class='page-item'>
@@ -103,28 +223,99 @@ function displayPageControl($what, &$list, &$preface, &$url, &$offset, $all)
                                     </a>
                                 </li>\n";
         }
+        */
     }
+    
 
     $url = urlReplace($url, "all", $all);
     $data = array();
     $data["rows"] = $rows;
-    $data["pagination"] = $pagination_html;
+    if(isset($pagination_html))
+    {
+        $data["pagination"] = $pagination_html;
+    }
     return $data;
 }
+
+
+
+function buildStartBtnGroupAnimation(){
+
+    print "<script>\n";
+
+    print "var IntervalFuncHandle;\n";
+
+    print "function Showing()\n";
+    print "{\n";
+       print "var pos = $(\"#btnGroupID\").css(\"margin-left\");\n";
+       print "var len = pos.length;\n";
+       print "var numpos = Number(pos.substring(0, len-2));\n";
+       print "if(numpos > -1)\n";
+       print "{\n";
+          print "clearInterval(IntervalFuncHandle);\n";
+          print "return;\n";
+       print "}\n";
+       print "numpos += 10;\n";
+       print "$(\"#btnGroupID\").css(\"margin-left\", numpos+\"px\");\n";
+    print "}\n";
+
+    print "function Hiding()\n";
+    print "{\n";
+       print "var pos = $(\"#btnGroupID\").css(\"margin-left\");\n";
+       print "var len = pos.length;\n";
+       print "var numpos = Number(pos.substring(0, len-2));\n";
+       print "if(numpos < -1000)\n";
+       print "{\n";
+          print "clearInterval(IntervalFuncHandle);\n";
+          print "return;\n";
+       print "}\n";
+       print "numpos -= 10;\n";
+       print "$(\"#btnGroupID\").css(\"margin-left\", numpos+\"px\");\n";
+    print "}\n";
+
+
+    print "function startBtnGroupAnimation() {\n";
+
+
+    print "var pos = $(\"#btnGroupID\").css(\"margin-left\");\n";
+    print "var len = pos.length;\n";
+    print "var numpos = Number(pos.substring(0, len-2));\n";
+    print "if(numpos < 0)\n";
+    print "{\n";
+       //$("#btnGroupID").css("margin-left", "0px");\n";
+       print "IntervalFuncHandle = setInterval(function(){ Showing(); }, 1);\n";
+    print "}\n";
+    print "else\n";
+    print "{\n";
+       //$("#btnGroupID").css("margin-left", "-1000px");
+       print "IntervalFuncHandle = setInterval(function(){ Hiding(); }, 1);\n";
+    print "}\n";
+    print "}\n";
+    print "</script>\n";
+
+}
+
+
 
 function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $pagination)
 {
     // add by rina  2021.11.06
-    
     print "<table class='table' style='width:100%; margin-bottom:0px'>\n";
             print "<tr>\n";
-            print "<td style='width:50px;'>\n";
-                print "<img src=\"../assets/img/R.png\" width='50px' height='50px' alt=\"Expand Buttons\">\n";
-            print "</td>\n";
+            
+            print "<td width=\"20px\">\n";
+                //print "<i class=\"fas fa-cloud\" style=\"font-size:60px;\"></i>\n";
+                //print "<input type=\"button\" style=\"border-radius: 80%;\" class=\"fa fa-car expanButtonBG\" value='...' onClick=\"startBtnGroupAnimation()\"></input>\n";
 
+                print "<button type=\"button\" class=\"btn btn-sm btn-default expanButtonBG\" data-container='body' data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Pan\" onClick=\"startBtnGroupAnimation()\"><span class=\"fa fa-arrows\"></span></button>\n";
+
+            print "</td>\n";
+            
             print "<td style='width:62%'>\n";
 
-    print "<div class=\"btn-group\">\n";
+    print "<div id=\"btnGroupID\" class=\"btn-group\" style=\"margin-left:-1000px;\">\n";
+
+    buildStartBtnGroupAnimation();
 
     $check = pacsone_gettext("Check All");
     $uncheck = pacsone_gettext("Uncheck All");
@@ -173,6 +364,8 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
             <td>$pagination</td>\n";
     print "<td style='float:right'><input class='form-control' id='myInput' type='text' placeholder='Search..'></td>\n";
     print "</tr></table>\n";
+    
+
     
 
     /*
@@ -246,7 +439,10 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
     global $dbcon;
     global $CUSTOMIZE_PATIENTS;
     global $BGCOLOR;
-    $rows = displayPageControl($CUSTOMIZE_PATIENTS, $list, $preface, $url, $offset, $all);
+    $data = displayPageControl($CUSTOMIZE_PATIENTS, $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"];  // changed to data, 
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+
     // check if Patient Reconciliation is enabled
     $matchWorklist = 0;
     $config = $dbcon->query("select matchworklist from config");
@@ -294,8 +490,9 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
             global $DUPLICATE_FILTER_THIS_MONTH;
             global $DUPLICATE_FILTER_THIS_YEAR;
             global $DUPLICATE_FILTER_DATE_RANGE;
-            print "<table width=100% border=0 cellpadding=5>\n";
-            print "<tr class=listhead bgcolor=$BGCOLOR><td>\n";
+            print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>\n";
+            //print "<tr class=listhead bgcolor=$BGCOLOR><td>\n";
+            print "<tr class='tableHeadForBGUp'><td>\n";
             print pacsone_gettext("Limit the display of Duplicate Patient IDs by the following filter:");
             print "</td></tr>";
             print "<tr class=listhead><td>\n";
@@ -323,11 +520,12 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
             print "</table>\n";
             $buttons['Apply Duplicate Patient ID Filter'] = array(pacsone_gettext('Apply Duplicate Patient ID Filter'), pacsone_gettext('Apply Selected Duplicate Patient ID Display Filter'), $modifyAccess);
         }
-        displayButtons("patient", $buttons, null);
+        
+        displayButtons("patient", $buttons, null, sizeof($rows), $pagination); 
     }
     // display patient table
-    print "<table width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     if ($checkbox) {
         print "\t<td></td>\n";
     }
@@ -383,8 +581,8 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
                 $subColumns = $subTblColumns[ $subTables[$field] ];
                 $colspan = count($subColumns);
                 print "\t<td align=center colspan=$colspan><b>$key</b>";
-                print "<table width=100% border=1 cellpadding=0 cellspacing=0>";
-                print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+                print "<table  class='table table-striped table-bordered' width=100% border=1 cellpadding=0 cellspacing=0>";
+                print "<tr class='tableHeadForBGUp'>\n";
                 foreach ($subColumns as $sub => $descr) {
                     print "<td>$descr</td>";
                 }
@@ -413,18 +611,23 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
     }
     print "</tr>\n";
     $count = 0;
+    
+    //print "logA\n";
+    //print_r($rows);
+    //print "\nlogB";
+
     foreach ($rows as $row) { 
-        $patientId = $row["origid"];
+        $patientId = isset($row["origid"])?$row["origid"]:"";
         $urlId = urlencode($patientId);
         $style = ($count++ & 0x1)? "oddrows" : "evenrows";
-        print "<tr class='$style'>\n";
+        print "<tr style='background-color:white;'>\n";
         if ($checkbox) {
 	        print "\t<td align=center width='1%'>\n";
-            $data = urlencode($row['origid']);
+            $data = urlencode(isset($row['origid'])?$row['origid']:"");
 	        print "\t\t<input type='checkbox' name='entry[]' value='$data'></td>\n";
         }
 		if ($modifyAccess) {
-			$current = $row["private"];
+			$current = isset($row["private"])?$row["private"]:"";
 			$value = ($current)? pacsone_gettext("Private ") : pacsone_gettext("Public ");
             if ($current)
 			    $toggle = "<font color=red>" . pacsone_gettext("Change to Public") . "</font>";
@@ -456,7 +659,7 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
                 $subColumns = $subTblColumns[$sub];
                 $colspan = count($subColumns);
                 print "\t<td align=center colspan=$colspan>";
-                print "<table width=100% border=1 cellpadding=0 cellspacing=0><tr>";
+                print "<table class='tabe table-striped table-bordered' width=100% border=1 cellpadding=0 cellspacing=0><tr>";
                 $query = "select * from $sub where patientid=?";
                 $subList = array($patientId);
                 $subq = $dbcon->preparedStmt($query, $subList);
@@ -503,7 +706,7 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
     }
     print "</table>\n";
     if ($checkbox) {
-        displayButtons("patient", $buttons, null);
+        //displayButtons("patient", $buttons, null, sizeof($rows), "");
 	    print "</form>\n";
     }
 }
@@ -671,7 +874,7 @@ function showFilter_Rina($pfiltersEnabled, $pfilters, $peurodate)
                 print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_READING_DOC $checked>&nbsp;";
                 print $CUSTOMIZE_READING_DOC;
                 $value = isset($pfilters['readdoc'])?$pfilters['readdoc'] : "";
-                printf("&nbsp;<input style=\"margin-left:1px;\" type=text name='readdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
+                printf("&nbsp;<input style=\"margin-left:5px;\" type=text name='readdoc' value='%s' size=16 maxlength=32>", strlen($value)? $value : "");
                 $checked = ($filterBy & $STUDY_FILTER_BY_DATE_RECEIVED)? "checked" : "";
                 print "<br><input type=checkbox name='filterBy[]' value=$STUDY_FILTER_BY_DATE_RECEIVED $checked>&nbsp;";
                 print pacsone_gettext("Date When Study Was Received");
@@ -855,6 +1058,9 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     global $PATIENT_INFO_STUDY_VIEW_TBL;
     global $STUDY_MODIFY_COLUMNS;
     global $BGCOLOR;
+
+    global $BTNGROUP_ANIMATION_DIR_FLAG;
+
     print "<form style='margin-top:-75px' method='POST' action='actionItem.php'>\n";
     $eurodate = $dbcon->isEuropeanDateFormat();
     // check if Patient Reconciliation is enabled
@@ -871,7 +1077,7 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     
     $data = displayPageControl(pacsone_gettext("Studies"), $list, $preface, $url, $offset, $all);
     $rows = $data["rows"];
-    $pagination = $data["pagination"];
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
     // check user privileges
     $checkbox = 0;
 	$username = $dbcon->username;
@@ -936,6 +1142,7 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
         $text = $filtersEnabled? pacsone_gettext("Hide Filters") : pacsone_gettext('Show Filters');
         $buttons['Show Filters'] = array($text, pacsone_gettext('Toggle display of filter settings for study view pages'), $viewAccess);
     }
+
     displayButtons("study", $buttons, null, sizeof($rows), $pagination); // ----------------------------
     
     // check if need to toggle sorting order
@@ -993,19 +1200,19 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
             print "\t<th></th>\n";
         }
         if ($modifyAccess) {
-            print "\t<th><b>";
+            print "\t<th style='vertical-align:middle;'><b>";
             print pacsone_gettext("Privacy");
             print "</b></th>\n";
         }
         foreach (array_keys($columns) as $key) {
             if (count($rows) && isset($links[$key])) {
                 $link = $links[$key];
-                print "\t<th><b><a href=$link>$key</a></b></th>\n";
+                print "\t<th style='vertical-align:middle;'><b><a href=$link>$key</a></b></th>\n";
             } else {
-                print "\t<th><b>$key</b></th>\n";
+                print "\t<th style='vertical-align:middle;'><b>$key</b></th>\n";
             }
         }
-        print "\t<th><b>";
+        print "\t<th style='vertical-align:top;'><b>";
         print pacsone_gettext("Total Number of Instances");
         print "</b></th>\n";
 
@@ -1412,7 +1619,10 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
         }
     }
     print "<td>";  // right panel
-    $rows = displayPageControl(pacsone_gettext("Series"), $list, $preface, $url, $offset, $all);
+    $data = displayPageControl(pacsone_gettext("Series"), $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"]; // add by rina
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+
     $checkbox = 0;
 	$username = $dbcon->username;
 	$modifyAccess = $dbcon->hasaccess("modifydata", $username);
@@ -1609,7 +1819,10 @@ function displayImage(&$list, $preface, $url, $offset, $all, $showStudyNotes)
     print "<td>";
     global $MYFONT;
     global $dbcon;
-    $rows = displayPageControl(pacsone_gettext("Instances"), $list, $preface, $url, $offset, $all);
+    $data = displayPageControl(pacsone_gettext("Instances"), $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"]; // add by rina
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+
     // check user privileges
 	$username = $dbcon->username;
 	$checkbox = 0;
@@ -1834,8 +2047,9 @@ function displayApplEntity($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     global $XFER_SYNTAX_TBL;
-    print "<table width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<div style='overflow:scroll;'>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -2019,15 +2233,17 @@ function displayApplEntity($result, $preface)
         print "</tr>\n";
     }
     print "</table>\n";
+    print "</div>\n";
+
     if ($access) {
     	print "<p><table width=20% border=0 cellpadding=5>\n";
         print "<tr>\n";
         if ($records) {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
-            print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+            print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
             $value = pacsone_gettext("Delete");
-            print "<td><input type=submit value='$value' name='action' title='";
+            print "<td><input class='btn btn-primary' type=submit value='$value' name='action' title='";
             print pacsone_gettext("Delete checked application entities");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Delete\");return confirm(\"";
             print pacsone_gettext("Are you sure?");
@@ -2040,7 +2256,7 @@ function displayApplEntity($result, $preface)
                 $noAdd = true;
         }
         if (!$noAdd) {
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Add");
             print "' name='action' title='";
             print pacsone_gettext("Add new application entity");
@@ -2061,7 +2277,10 @@ function displayJobStatus($result, $preface, $status, $type, $url, $offset, $all
     $list = array();
     while ($row = $result->fetch(PDO::FETCH_ASSOC))
         $list[] = $row;
-    $rows = displayPageControl(pacsone_gettext("Jobs"), $list, $preface, $url, $offset, $all);
+    $data = displayPageControl(pacsone_gettext("Jobs"), $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"]; // add by rina
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+
     // check whether to bypass Series level
     $skipSeries = 0;
     $config = $dbcon->query("select skipseries from config");
@@ -2087,11 +2306,13 @@ function displayJobStatus($result, $preface, $status, $type, $url, $offset, $all
     global $CUSTOMIZE_PATIENT_SEX;
     global $CUSTOMIZE_PATIENT_DOB;
     print "<tr><td>\n";
-    print "<table width=100% border=0 cellpadding=1 class='mouseover optionrow'>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
-	if ($records) {
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=1 class='mouseover optionrow'>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
+
+    if ($records && isset($rows[0])) {
         global $JOB_STATUS_COLUMNS_TBL;
         print "\t<td></td>\n";
+        
         $columns = array_keys($rows[0]);
         foreach ($columns as $column) {
             $header = ucfirst($column);
@@ -2103,8 +2324,12 @@ function displayJobStatus($result, $preface, $status, $type, $url, $offset, $all
     print "</tr>\n";
     $count = 0;
     foreach ($rows as $row) {
+        
         $style = ($count++ & 0x1)? "oddrows" : "evenrows";
         print "<tr class='$style'>\n";
+
+        if(!isset($row["status"])) continue;
+
 		if (strcasecmp($row["status"], "Failed") == 0 ) {
 			$failed++;
             if (strcasecmp($row["type"], "Forward") == 0)
@@ -2259,15 +2484,15 @@ function displayJobStatus($result, $preface, $status, $type, $url, $offset, $all
         print "<tr>\n";
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
-        print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></input></td>\n";
+        print "<td><input class='btn btn-primary'  type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></input></td>\n";
 		if ($failed && $forwardjob && strcasecmp($status, "Failed") == 0) {
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Retry");
             print "' name='action' title='";
             print pacsone_gettext("Retry Failed Job");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Retry\")'></input></td>\n";
 		}
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete Selected Jobs");
@@ -2276,7 +2501,7 @@ function displayJobStatus($result, $preface, $status, $type, $url, $offset, $all
         print "\");'></td>\n";
         if (!strcasecmp($status, "Submitted") && ($type == 4)) {
             // show a button to change later-scheduled jobs to immediate jobs
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Run Immediately");
             print "' name='action' title='";
             print pacsone_gettext("Run Selected Jobs Immediately");
@@ -2731,7 +2956,7 @@ function displayUsers($result, $preface, $ldap = 0)
     include_once 'toggleRowColor.js';
     global $dbcon;
     global $USER_PRIVILEGE_TBL;
-    print "<table width=100% cellpadding=0 cellspacing=0 border=0>\n";
+    print "<table class=\"table\" width=100% cellpadding=0 cellspacing=0 border=0>\n";
     print "<tr><td>\n";
     print "<br>$preface\n";
     print "</td></tr>\n";
@@ -2746,12 +2971,14 @@ function displayUsers($result, $preface, $ldap = 0)
     // display all columns
     global $BGCOLOR;
     global $MYFONT;
-    print "<table width=100% border=0 cellpadding=3 class='mouseover optionrow'>\n";
+    print "<div class=\"rows\" style=\"overflow: scroll;\">\n";
+    print "<table class=\"table table-striped table-bordered\" width=100% border=0 cellpadding=3 class='mouseover optionrow'>\n";
     print "<form method='POST' action='modifyUser.php'>\n";
     print "<input type='hidden' name='actionvalue'>\n";
     if ($ldap)
         print "<input type='hidden' name='ldap' value=1>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($records) {
     	print "\t<td></td>\n";
         foreach ($USER_PRIVILEGE_TBL as $column => $descr) {
@@ -2811,13 +3038,14 @@ function displayUsers($result, $preface, $ldap = 0)
         print "</tr>\n";
     }
     print "</table>\n";
+    print "</div>\n";
     print "<p><table width=20% border=0 cellpadding=5>\n";
     print "<tr>\n";
 	if ($records) {
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
-    	print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-    	print "<td><input type=submit value='";
+    	print "<td><input class=\"btn btn-primary\" type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+    	print "<td><input class=\"btn btn-primary\" type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete Selected Users");
@@ -2826,7 +3054,7 @@ function displayUsers($result, $preface, $ldap = 0)
         print "\");'></td>\n";
 	}
     if (!$ldap) {
-        print "<td><input type=submit value='";
+        print "<td><input class=\"btn btn-primary\" type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add New User");
@@ -2896,8 +3124,8 @@ function displayRouteEntry($result, $preface, $mpps = false)
     global $MYFONT;
     global $WEEKDAY_MASK;
     print "<tr><td>\n";
-    print "<table width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -3059,27 +3287,27 @@ function displayRouteEntry($result, $preface, $mpps = false)
         if ($records) {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
-            print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+            print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
         }
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add New Routing Rule");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Add\")'></td>\n";
         if ($records) {
-            print "<td><input type=submit value='";
+            print "<td><input style='margin-left:1px;' class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete Checked Routing Rules");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Delete\");return confirm(\"";
             print pacsone_gettext("Are you sure?");
             print "\");'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Enable All");
             print "' name='action' title='";
             print pacsone_gettext("Enable All Routing Rules");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Enable All\")'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Disable All");
             print "' name='action' title='";
             print pacsone_gettext("Disable All Routing Rules");
@@ -3233,10 +3461,20 @@ function displayWorklist($preface, &$list, $url, $offset, $all)
     print "<br><table width=100% border=0 cellpadding=5 cellspacing=0>\n";
     global $BGCOLOR;
     print "<tr><td>";
-    $rows = displayPageControl(pacsone_gettext("Worklist"), $list, $preface, $url, $offset, $all);
+
+    $data = displayPageControl(pacsone_gettext("Worklist"), $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"]; // add by rina
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+    
+
     print "</td></tr>";
+
+    print "<tr>\n";
+    displayPagenation($pagination);
+    print "</tr>\n";
+
     // table headers
-    print "<tr><td><table width=100% border=0 cellpadding=5>\n";
+    print "<tr><td><table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>\n";
     $columns = array (
         $CUSTOMIZE_PATIENT_NAME                         => array(true, "patientname"),
         $CUSTOMIZE_PATIENT_ID                           => array(true, "patientid"),
@@ -3250,9 +3488,9 @@ function displayWorklist($preface, &$list, $url, $offset, $all)
     );
     // display the table header
     if (count($rows)) {
-        print "<tr class=listhead>\n";
+        print "<tr class='tableHeadForBGUp'>\n";
         if ($checkbox) {
-            print "\t<td bgcolor=$BGCOLOR></td>\n";
+            print "\t<td></td>\n";
         }
 	    foreach ($columns as $key => $pair) {
             $sort = $pair[0];
@@ -3262,17 +3500,21 @@ function displayWorklist($preface, &$list, $url, $offset, $all)
                     $column = "scheduledps." . $column;
                 $column = urlencode($column);
                 $link = urlReplace($url, "sort", $column);
-                print "<td bgcolor=$BGCOLOR><b><a href=\"$link\">$key</a></b></td>\n";
+                print "<td><b><a href=\"$link\">$key</a></b></td>\n";
             } else {
-	            print "<td bgcolor=$BGCOLOR><b>$key</b></td>\n";
+	            print "<td><b>$key</b></td>\n";
             }
 	    }
         print "</tr>\n";
     }
     global $STUDY_COLORS;
+
     foreach ($rows as $row) {
         $color = "";
         $query = "select status from worklist where studyuid=?";
+        
+        if(!isset($row[0])) continue;
+
         $bindList = array($row[0]);
         $result = $dbcon->preparedStmt($query, $bindList);
         if ($result && $result->rowCount()) {
@@ -3282,6 +3524,7 @@ function displayWorklist($preface, &$list, $url, $offset, $all)
         }
         print "<tr $color>\n";
         $studyUid = $row[0];
+
         $uid = urlencode($row[0]);
         if ($checkbox) {
 	        print "\t<td align=center width='1%'>\n";
@@ -3317,9 +3560,9 @@ function displayWorklist($preface, &$list, $url, $offset, $all)
         print "<tr>\n";
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
-        print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+        print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
 		if ($modifyAccess) {
-        	print "<td><input type=submit value='";
+        	print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete checked worklist items");
@@ -3549,8 +3792,8 @@ function displayCoercion($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     print "<tr><td>\n";
-    print "<table width=100% border=0 cellpadding=5>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -3575,7 +3818,7 @@ function displayCoercion($result, $preface)
     print "</b></td>\n";
     print "</tr>\n";
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
 		if ($access) {
 			print "\t<td align=center width='1%'>\n";
             $title = $row['aetitle'];
@@ -3618,8 +3861,8 @@ function displayCoercion($result, $preface)
         if ($records) {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
-            print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete checked Data Element Coercion rules");
@@ -3627,7 +3870,7 @@ function displayCoercion($result, $preface)
             print pacsone_gettext("Are you sure?");
             print "\");'></td>\n";
         }
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add new Data Element Coercion rule");
@@ -3703,7 +3946,10 @@ function displayStudiesForExport(&$selected, $preface, $url, $offset, $all, $zip
     }
     // sort the rows based on Study ID by default
     usort($studies, $sort);
-    $rows = displayPageControl(pacsone_gettext("Studies"), $studies, $preface, $url, $offset, $all);
+    $data = displayPageControl(pacsone_gettext("Studies"), $studies, $preface, $url, $offset, $all);
+    $rows = $data["rows"]; // add by rina
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+
     $buttons = array(
         'Update'    => array(pacsone_gettext('Update'), pacsone_gettext('Update Selected Studies'), 1),
         'Export'    => array(pacsone_gettext('Export'), pacsone_gettext('Export Selected Studies'), 1),
@@ -4059,12 +4305,20 @@ function displayJournal($list, $preface, $url, $offset, $all)
     global $dbcon;
     print "<br><table width=100% border=0 cellpadding=5 cellspacing=0>\n";
     global $BGCOLOR;
-    print "<tr><td>";
-    $rows = displayPageControl(pacsone_gettext("Events"), $list, $preface, $url, $offset, $all);
+    print "<tr class='info'><td>";
+    
+    $data = displayPageControl(pacsone_gettext("Events"), $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"]; // add by rina
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+
     print "</td></tr>";
+
+    //  display pagination
+    print "<tr>\n"; displayPagenation($pagination); print "</tr>\n";
+
     // display the current page
     print "<tr><td>";
-    print "<table width=100% border=1 cellpadding=0 cellspacing=0>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=1 cellpadding=0 cellspacing=0>\n";
     // check if need to toggle sorting order
     if (isset($_SESSION['sortToggle'])) {
         $toggle = 1 - $_SESSION['sortToggle'];
@@ -4087,7 +4341,7 @@ function displayJournal($list, $preface, $url, $offset, $all)
         pacsone_gettext("UID")            => "uuid",
         pacsone_gettext("Details")        => "details",
     );
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     foreach (array_keys($columns) as $key) {
         if (count($rows) && isset($links[$key])) {
             $link = $links[$key];
@@ -4097,10 +4351,21 @@ function displayJournal($list, $preface, $url, $offset, $all)
         }
     }
     print "</tr>\n";
+
+    //print "\n rows A================\n";
+    //print_r($rows);
+    //print "\n rows B================\n";
+
     foreach ($rows as $row) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
         foreach ($columns as $key => $field) {
-            $value = $row[$field];
+            
+            //print_r($row[0]); print "\n======\n";
+
+            $value = isset($row[$field])?$row[$field]:"";
+
+            //print "key=".$key." field= ". $field. " val= ". $value. "\n";
+
             if (isset($value) && strlen($value)) {
                 if (strcasecmp($field, "timestamp") == 0)
                     $value = $dbcon->formatDateTime($value);
@@ -4110,6 +4375,7 @@ function displayJournal($list, $preface, $url, $offset, $all)
                print "\t<td>$MYFONT" . pacsone_gettext("N/A") . "</font></td>\n";
         }
         print "</tr>\n";
+        
     }
     print "</table>";
     print "</td></tr></table>";
@@ -4124,7 +4390,10 @@ function displayStatReport($list, $preface, $url, $offset, $all, $type)
     $result = $dbcon->query("select skipseries from config");
     if ($result && ($row = $result->fetch(PDO::FETCH_NUM)))
         $skipSeries = $row[0];
-    $rows = displayPageControl(pacsone_gettext("Studies"), $list, $preface, $url, $offset, $all);
+    
+    $data = displayPageControl(pacsone_gettext("Studies"), $list, $preface, $url, $offset, $all);
+    $rows = $data["rows"]; // add by rina
+    $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
     // check user privileges
     $checkbox = 0;
 	$username = $dbcon->username;
@@ -4299,8 +4568,8 @@ function displaySmtpServer($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     global $SMTP_PORTS;
-    print "<table width=100% border=0 cellpadding=5>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     if ($records) {
         print "\t<td></td>\n";
     }
@@ -4321,7 +4590,7 @@ function displaySmtpServer($result, $preface)
     print "\t<td><b>" . pacsone_gettext("Edit") . "</b></td>\n";
     print "</tr>\n";
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
         print "\t<td align=center width='1%'>\n";
         $server = $row['hostname'];
         print "\t\t<input type='checkbox' name='entry[]' value='$server'</td>\n";
@@ -4348,8 +4617,8 @@ function displaySmtpServer($result, $preface)
     if ($records) {
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
-        print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete checked SMTP server configurations");
@@ -4357,7 +4626,7 @@ function displaySmtpServer($result, $preface)
         print pacsone_gettext("Are you sure?");
         print "\");'></td>\n";
     } else {
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add new SMTP server");
@@ -4744,9 +5013,9 @@ function displayExportForm($level, &$exportdir)
     global $dbcon;
     global $EXPORT_MEDIA;
     print pacsone_gettext("Export To Local Directory: \n");
-    print "<input type=text name='exportdir' size=64 maxlength=256 value='$exportdir'></input><br>";
+    print "<input style='margin-left:174px;' type=text name='exportdir' size=64 maxlength=256 value='$exportdir'></input><br>";
     print pacsone_gettext("Export Media Size: ");
-    print "<select name='media'>\n";
+    print "<select style='margin-left:217px;' name='media'>\n";
     foreach ($EXPORT_MEDIA as $type => $size) {
         $selected = strcasecmp($type, "CD")? "" : "selected";
         $descr = $size[0];
@@ -4757,7 +5026,7 @@ function displayExportForm($level, &$exportdir)
     if (isset($_SESSION['ExportMediaLabel']))
         $label = $_SESSION['ExportMediaLabel'];
     print "<br>" . pacsone_gettext("Media Label: ");
-    print "<input type=text name='label' size=16 maxlength=16 value=$label></input>";
+    print "<input style='margin-left:254px;' type=text name='label' size=16 maxlength=16 value=$label></input>";
     print "<br><input type=checkbox name='zip' value=1>";
     print pacsone_gettext("Compress exported content into ZIP file");
     print "</input><br>";
@@ -5025,7 +5294,7 @@ function displayHL7Route($result, $preface)
 function displayGroups($result, $preface, $ldap = 0)
 {
     global $USER_PRIVILEGE_TBL;
-    print "<table width=100% cellpadding=0 cellspacing=0 border=0>\n";
+    print "<table class='table' width=100% cellpadding=0 cellspacing=0 border=0>\n";
     print "<tr><td>\n";
     print "<br>$preface\n";
     print "</td></tr>\n";
@@ -5040,12 +5309,14 @@ function displayGroups($result, $preface, $ldap = 0)
     // display all columns
     global $BGCOLOR;
     global $MYFONT;
-    print "<table width=100% border=0 cellpadding=3>\n";
+    print "<div class=\"rows\" style=\"overflow: scroll;\">\n";
+    print "<table class=\"table table-striped table-bordered\" width=100% border=0 cellpadding=3>\n";
     print "<form method='POST' action='modifyUser.php'>\n";
     print "<input type='hidden' name='actionvalue'>\n";
     if ($ldap)
         print "<input type='hidden' name='ldap' value=1>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     $columns = $USER_PRIVILEGE_TBL;
     $columns["lastname"] = pacsone_gettext("Group Name");
     unset($columns["firstname"]);
@@ -5065,7 +5336,7 @@ function displayGroups($result, $preface, $ldap = 0)
     }
     print "</tr>\n";
     foreach ($groups as $row) {
-        print "<tr>\n";
+        print "<tr style=\"background-color:white;\">\n";
 		if ($records) {
 			print "\t<td align=center width='1%'>\n";
 			$user = $row["username"];
@@ -5098,13 +5369,14 @@ function displayGroups($result, $preface, $ldap = 0)
         print "</tr>\n";
     }
     print "</table>\n";
+    print "</div>\n";
     print "<p><table width=20% border=0 cellpadding=5>\n";
     print "<tr>\n";
 	if ($records) {
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
-    	print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-    	print "<td><input type=submit value='";
+    	print "<td><input class=\"btn btn-primary\" type=\"button\" value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+    	print "<td><input class=\"btn btn-primary\" type=submit value='";
         print pacsone_gettext("Delete User Group");
         print "' name='action' title='";
         print pacsone_gettext("Delete Selected User Groups");
@@ -5113,7 +5385,7 @@ function displayGroups($result, $preface, $ldap = 0)
         print "\");'></td>\n";
 	}
     if (!$ldap) {
-        print "<td><input type=submit value='";
+        print "<td><input style='margin-left:1px;' class=\"btn btn-primary\" type=submit value='";
         print pacsone_gettext("Add User Group");
         print "' name='action' title='";
         print pacsone_gettext("Add User Group");
@@ -5227,8 +5499,8 @@ function displayAutoPurgeFilters($result, $preface)
     global $MYFONT;
     global $AUTOPURGE_FILTER_TBL;
     print "<tr><td>\n";
-    print "<table width=100% border=0 cellpadding=5>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -5250,7 +5522,7 @@ function displayAutoPurgeFilters($result, $preface)
     print "</b></td>\n";
     print "</tr>\n";
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
 		if ($access) {
 			print "\t<td align=center width='1%'>\n";
             $key = $row['directory'] . "|" . $row['tag'] . "|" . $row['pattern'];
@@ -5294,8 +5566,8 @@ function displayAutoPurgeFilters($result, $preface)
         if ($records) {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
-            print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete checked Automatic Purging filters");
@@ -5303,7 +5575,7 @@ function displayAutoPurgeFilters($result, $preface)
             print pacsone_gettext("Are you sure?");
             print "\");'></td>\n";
         }
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add new Automatic Purging filters");
@@ -5338,8 +5610,8 @@ function displayAnonymization($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     print "<tr><td>\n";
-    print "<table width=100% border=1 cellpadding=5 cellspacing=0>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=1 cellpadding=5 cellspacing=0>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -5360,7 +5632,7 @@ function displayAnonymization($result, $preface)
     print "</b></td>\n";
     print "</tr>\n";
     while ($result && ($row = $result->fetch(PDO::FETCH_NUM))) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
 		if ($access) {
 			print "\t<td align=center width='1%'>\n";
             $value = $row[0];
@@ -5412,8 +5684,8 @@ function displayAnonymization($result, $preface)
         if ($records) {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
-            print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete checked Anonymization Templates");
@@ -5421,7 +5693,7 @@ function displayAnonymization($result, $preface)
             print pacsone_gettext("Are you sure?");
             print "\");'></td>\n";
         }
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add new Anonymization Template");
@@ -5456,8 +5728,8 @@ function displayAutoPurgeSettings($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     print "<tr><td>\n";
-    print "<table width=100% border=0 cellpadding=5>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -5476,7 +5748,7 @@ function displayAutoPurgeSettings($result, $preface)
     }
     print "</tr>\n";
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
 		if ($access) {
 			print "\t<td align=center width='1%'>\n";
             $key = $row['seq'];
@@ -5549,8 +5821,8 @@ function displayAutoPurgeSettings($result, $preface)
         if ($records) {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
-            print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete checked Automatic Purging Rules");
@@ -5558,7 +5830,7 @@ function displayAutoPurgeSettings($result, $preface)
             print pacsone_gettext("Are you sure?");
             print "\");'></td>\n";
         }
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add new Automatic Purging Rule");
@@ -5887,8 +6159,8 @@ function displayTranscription($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     print "<tr><td>\n";
-    print "<table width=100% border=1 cellpadding=5 cellspacing=0>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-striped table-bordered' width=100% border=1 cellpadding=5 cellspacing=0>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($records) {
         print "\t<td></td>\n";
 	}
@@ -5909,7 +6181,7 @@ function displayTranscription($result, $preface)
         pacsone_gettext("Description")      		=> "description",
     );
     while ($result && ($row = $result->fetch(PDO::FETCH_NUM))) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
 		print "\t<td align=center width='1%'>\n";
         $name = $row[0];
 		print "\t\t<input type='checkbox' name='entry[]' value='$name'</td>\n";
@@ -5952,8 +6224,8 @@ function displayTranscription($result, $preface)
     if ($records) {
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
-        print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete checked Transcription Templates");
@@ -5961,7 +6233,7 @@ function displayTranscription($result, $preface)
         print pacsone_gettext("Are you sure?");
         print "\");'></td>\n";
     }
-    print "<td><input type=submit value='";
+    print "<td><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Add");
     print "' name='action' title='";
     print pacsone_gettext("Add new Transcription Template");
@@ -5982,7 +6254,7 @@ function displayRestartButton($preface)
     print "<br>$preface\n";
     print "</td></tr>\n";
     print "<tr><td>&nbsp;</td></tr>\n";
-    print "<tr><td><input type=submit name='action' value='";
+    print "<tr><td><input class='btn btn-primary' type=submit name='action' value='";
     print pacsone_gettext("Restart");
     print "' title='";
     print pacsone_gettext("Restart Service");
@@ -6008,7 +6280,8 @@ function displayUserSignups($result, $preface)
     // display all columns
     global $BGCOLOR;
     global $MYFONT;
-    print "<table width=100% border=0 cellpadding=3>\n";
+    print "<div class=\"rows\" style=\"overflow: scroll;\">\n";
+    print "<table class=\"table table-striped table-bordered\" width=100% border=0 cellpadding=3>\n";
     print "<form method='POST' action='modifyUserSignup.php'>\n";
     print "<input type='hidden' name='actionvalue'>\n";
     $columns = array(
@@ -6018,7 +6291,9 @@ function displayUserSignups($result, $preface)
         "email"         => pacsone_gettext("Email Address"),
         "submitted"     => pacsone_gettext("Sign-Up Request Submitted"),
     );
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
+
    	print "\t<td></td>\n";
     foreach ($columns as $column => $descr) {
         print "\t<td><b>";
@@ -6027,7 +6302,7 @@ function displayUserSignups($result, $preface)
     }
     print "</tr>\n";
     foreach ($requests as $row) {
-        print "<tr>\n";
+        print "<tr class='Danger' >\n";
 		print "\t<td align=center width='1%'>\n";
 		$user = $row["username"];
 		print "\t\t<input type='checkbox' name='entry[]' value='$user'>";
@@ -6048,22 +6323,24 @@ function displayUserSignups($result, $preface)
         print "</tr>\n";
     }
     print "</table>\n";
-    print "<p><table width=20% border=0 cellpadding=5>\n";
+    print "</div>\n";
+
+    print "<p><table width=25% border=0 cellpadding=5>\n";
     print "<tr>\n";
     $check = pacsone_gettext("Check All");
     $uncheck = pacsone_gettext("Uncheck All");
-    print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-    print "<td><input type=submit value='";
+    print "<td><input class='btn btn-primary' type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
+    print "<td><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Approve");
     print "' name='action' title='";
     print pacsone_gettext("Approve Selected User Sign-Up Request");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Approve\")'></td>\n";
-    print "<td><input type=submit value='";
+    print "<td><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Reject");
     print "' name='action' title='";
     print pacsone_gettext("Reject Selected User Sign-Up Request");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Reject\")'></td>\n";
-    print "<td><input type=submit value='";
+    print "<td><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Delete");
     print "' name='action' title='";
     print pacsone_gettext("Delete Selected User Sign-Up Requests");
@@ -6073,6 +6350,23 @@ function displayUserSignups($result, $preface)
     print "</tr>\n";
     print "</table>\n";
 	print "</form>\n";
+}
+
+// Add by rina
+function displayPagenation($paginationParam)
+{
+    print "<table class='table' style='width:100%; margin-bottom:0px'>\n";
+    print "<tr>\n";
+    print "<td width=\"20px\">\n";
+    print "</td>\n";
+    print "<td>\n";
+    print "</td>\n";
+    print "<td style='float:right'>$paginationParam</td>\n";
+    
+    //print "<td style='float:right'><input class='form-control' id='myInput' type='text' placeholder='Search..'></td>\n";
+
+    print "</tr></table>\n";
+
 }
 
 ?>

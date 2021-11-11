@@ -38,8 +38,9 @@ $result = $dbcon->preparedStmt($query, $bindList);
 if ($result && $result->rowCount()) {
     $row = $result->fetch(PDO::FETCH_ASSOC);
     require_once 'display.php';
-    print "<p><table width=100% border=0 cellpadding=5>";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<div style='overflow:scroll;'>\n";
+    print "<p><table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>";
+    print "<tr class='tableHeadForBGUp'>\n";
     $columns = array_keys($row);
     foreach ($columns as $column) {
         // hide veterinary columns
@@ -50,7 +51,7 @@ if ($result && $result->rowCount()) {
     }
     print "</tr>\n";
     $patientId = urlencode($row["origid"]);
-    print "<tr>\n";
+    print "<tr style='background-color:white;'>\n";
     foreach ($row as $key => $field) {
         // hide veterinary columns
         if (!$dbcon->isVeterinary() && $dbcon->isVeterinaryColumn($key))
@@ -89,6 +90,8 @@ if ($result && $result->rowCount()) {
     }
     print "</tr>\n";
     print "</table>";
+    print "<p>";
+    print "</div>\n";
 } else {
     print "<p><br>";
     global $CUSTOMIZE_PATIENT_ID;

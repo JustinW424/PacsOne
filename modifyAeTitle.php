@@ -940,7 +940,7 @@ function addEntryForm()
         pacsone_gettext("Reading Physician Filters"),
     );
     global $BGCOLOR;
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     foreach ($columns as $cmd)
         print "<td><b>$cmd</td></b>";
     print "</tr>\n";
@@ -1278,7 +1278,7 @@ function addEntryForm()
         print "</td></tr>";
     }
     print "</table>\n";
-    print "<p><input type='submit' name='action' value='";
+    print "<p><input class='btn btn-primary' type='submit' name='action' value='";
     print pacsone_gettext("Add");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Add\")'></form>\n";
 	require_once 'footer.php';
@@ -1390,7 +1390,7 @@ function modifyEntryForm($title)
             pacsone_gettext("Reading Physician Filters"),
         );
         global $BGCOLOR;
-        print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+        print "<tr class='tableHeadForBGUp'>\n";
         foreach ($columns as $cmd)
             print "<td><b>$cmd</td></b>";
         print "</tr>\n";
@@ -1900,7 +1900,7 @@ function modifyEntryForm($title)
             print "</td></tr>";
         }
         print "</table>\n";
-        print "<p><input type='submit' name='action' value='";
+        print "<p><input class='btn btn-primary' type='submit' name='action' value='";
         print pacsone_gettext("Modify");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Modify\")'>\n";
         print "</form>\n";

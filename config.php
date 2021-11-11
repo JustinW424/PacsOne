@@ -907,13 +907,13 @@ print "<br><input type='radio' name='videoformat' value='$CONVERT_VIDEO_MP4' $ch
 print $CONVERT_VIDEO_FORMAT_TBL[$CONVERT_VIDEO_MP4][0];
 print "</input>&nbsp;&nbsp;&nbsp;";
 print pacsone_gettext("Conversion Settings:");
-print "&nbsp;<input type='text' size=64 maxlength=255 name='mp4args' value='$mp4Args'></input>";
+print "&nbsp;<input style='margin-left:11px;' type='text' size=64 maxlength=255 name='mp4args' value='$mp4Args'></input>";
 $checked = ($value == $CONVERT_VIDEO_SWF)? "checked" : "";
 print "<br><input type='radio' name='videoformat' value='$CONVERT_VIDEO_SWF' $checked>";
 print $CONVERT_VIDEO_FORMAT_TBL[$CONVERT_VIDEO_SWF][0];
 print "</input>&nbsp;&nbsp;&nbsp;";
 print pacsone_gettext("Conversion Settings:");
-print "&nbsp;<input type='text' size=64 maxlength=255 name='swfargs' value='$swfArgs'></input>";
+print "&nbsp;<input style='margin-left:9px;' type='text' size=64 maxlength=255 name='swfargs' value='$swfArgs'></input>";
 print "</td></tr>\n";
 // whether or not to enable veterinary information view
 print "<tr><td>";
@@ -1104,7 +1104,7 @@ print "</table>\n";
 print "</td></tr>\n";
 print "<tr><td colspan=2>&nbsp;</td></tr>\n";
 print "<tr><td>";
-printf("<input type=submit value='%s' title='", pacsone_gettext("Modify"));
+printf("<input class='btn btn-primary' type=submit value='%s' title='", pacsone_gettext("Modify"));
 print pacsone_gettext("Update System Configuration");
 print "'>\n";
 print "</td></tr>\n";

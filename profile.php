@@ -461,7 +461,7 @@ function modifyEntryForm($user)
         print "<input type='text' name='refreshperiod' size=6 maxlength=6 value=$value></input>";
         print "</td></tr>";
         print "</table>\n";
-        print "<p><input type='submit' value='";
+        print "<p><input class='btn btn-primary' type='submit' value='";
         print pacsone_gettext("Modify");
         print "'>\n";
         print "</form>\n";

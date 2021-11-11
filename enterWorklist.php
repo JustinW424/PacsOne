@@ -152,7 +152,7 @@ function entryForm(&$dbcon, $uid)
     if (!strlen($value))
         $value = isset($_POST["patientid"])? $_POST["patientid"] : "";
     print "<td class='RequiredField'><input type='text' size=32 maxlength=64 name='patientid' value='$value'>";
-    print "&nbsp;<input type='submit' name='action' value='";
+    print "&nbsp;<input class='btn btn-primary' type='submit' name='action' value='";
     print pacsone_gettext("Search");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Search\")'>\n";
     print "</td></tr>\n";
@@ -389,7 +389,7 @@ function entryForm(&$dbcon, $uid)
     print "</table>\n";
     if (strlen($uid))
         print "<input type=hidden name='uid' value='$uid'>";
-    print "<p><input type='submit' name='action' value='";
+    print "<p><input class='btn btn-primary' type='submit' name='action' value='";
     $value = strlen($uid)? pacsone_gettext("Modify") : pacsone_gettext("Add");
     print $value;
     $value = strlen($uid)? "Modify" : "Add";

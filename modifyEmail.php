@@ -334,7 +334,7 @@ function addEntryForm()
     print "<input type=text name='ntlmhost' size=32 maxlength=255>";
     print "</td></tr>\n";
     print "</table>\n";
-    print "<p><input type='submit' name='action' value='";
+    print "<p><input class='btn btn-primary' type='submit' name='action' value='";
     print pacsone_gettext("Add");
     print "' onclick='switchText(this.form,\"actionvalue\",\"Add\")'></form>\n";
     require_once 'footer.php';
@@ -458,7 +458,7 @@ function modifyEntryForm($server)
         print "<input type=text name='ntlmhost' value='$data' size=32 maxlength=255>";
         print "</td></tr>\n";
         print "</table>\n";
-        print "<p><input type='submit' name='action' value='";
+        print "<p><input class='btn btn-primary' type='submit' name='action' value='";
         print pacsone_gettext("Modify");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Modify\")'>\n";
         print "</form>\n";

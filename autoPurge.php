@@ -51,7 +51,7 @@ function addEntryForm()
     print pacsone_gettext("Purge Study Acquired More Than <input type='text' size=5 maxlength=5 name='agingdate' value='30'> Days Ago");
     print "<br><input type='radio' name='purgeby' value='SourceAe'>";
     print pacsone_gettext("All Studies Received From This Source AE: ");
-    print "<input type='text' size=16 maxlength=16 name='sourceae'></input>";
+    print "<input style='margin-left:60px;' type='text' size=16 maxlength=16 name='sourceae'></input>";
     print "</td></tr>";
     $hour = 12;
     $checkedAM = "checked";
@@ -77,7 +77,7 @@ function addEntryForm()
     print "<br>\n";
     print "<input type='radio' name='oper' value='move'>";
     print pacsone_gettext("Move Image Files to Destination Folder: ");
-    print "<input type='text' name='destdir' size=32 maxlength=255><br>\n";
+    print "<input style='margin-left:80px;' type='text' name='destdir' size=32 maxlength=255><br>\n";
     print pacsone_gettext("(For Windows platforms, use Windows UNC format, e.g., \"\\\\RemoteHost\\RemotePath\\\" if the destination folder specified above is a network-shared folder)");
     print "</td></tr>\n";
     print "<tr><td>";
@@ -89,7 +89,7 @@ function addEntryForm()
     print pacsone_gettext("No");
     print "</td></tr>\n";
     print "</tr></table>";
-    print "<p><input type=submit value='";
+    print "<p><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Add");
     print "' name='action' title='";
     print pacsone_gettext("Add new Automatic Purging Rule");
@@ -153,7 +153,7 @@ function modifyEntryForm($row, $seq)
     printf(pacsone_gettext("Purge Study Acquired More Than <input type='text' size=5 maxlength=5 name='agingdate' value='%d'> Days Ago"), ($aging < 0)? abs($aging) : 30);
     print "<br><input type='radio' name='purgeby' value='SourceAe' $bySourceAe>";
     print pacsone_gettext("All Studies Received From This Source AE: ");
-    print "<input type='text' size=16 maxlength=16 name='sourceae' value=\"$sourceAe\"></input>";
+    print "<input style='margin-left:60px;' type='text' size=16 maxlength=16 name='sourceae' value=\"$sourceAe\"></input>";
     print "</td></tr>";
     $schedule = $row['schedule'];
     $hour = $schedule % 12;
@@ -186,7 +186,7 @@ function modifyEntryForm($row, $seq)
     print "<br>\n";
     print "<input type='radio' name='oper' value='move' $checkedMov>";
     print pacsone_gettext("Move Image Files to Destination Folder: ");
-    print "<input type='text' name='destdir' size=32 maxlength=255 value='$destdir'><br>\n";
+    print "<input style='margin-left:80px;' type='text' name='destdir' size=32 maxlength=255 value='$destdir'><br>\n";
     print pacsone_gettext("(For Windows platforms, use Windows UNC format, e.g., \"\\\\RemoteHost\\RemotePath\\\" if the destination folder specified above is a network-shared folder)");
     print "</td></tr>\n";
     $delpatient = $row['delpatient'];
@@ -201,7 +201,7 @@ function modifyEntryForm($row, $seq)
     print pacsone_gettext("No");
     print "</td></tr>\n";
     print "</tr></table>";
-    print "<p><input type=submit value='";
+    print "<p><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Modify");
     print "' name='action' title='";
     print pacsone_gettext("Modify Automatic Purging Rule");
