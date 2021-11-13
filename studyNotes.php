@@ -612,7 +612,7 @@ function addEntryForm(&$username, &$patientId, &$uid)
     print "<tr><td>";
     print pacsone_gettext("Attachment:");
     print "</td>";
-    print "<td><input class=\"btn btn-primary\" type=file name='attachfile' size=64 $disabled><br>\n";
+    print "<td><input class='filestyle' type=file name='attachfile' size=64 $disabled><br>\n";
     print pacsone_gettext("(The following file types can be attached)");
     print "<br><b>";
     foreach ($MIME_TBL as $ext => $mimetype) {
@@ -638,7 +638,7 @@ function addEntryForm(&$username, &$patientId, &$uid)
                 print "<img src='attachment.gif' border=0>";
                 print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
             }
-            print "<br><input type=submit name='action' value='";
+            print "<br><input class='btn btn-primary' type=submit name='action' value='";
             print pacsone_gettext("Unattach");
             print "' onclick='switchText(this.form,\"studynoteaction\",\"Unattach\")'>\n";
             if ($pdf) {
@@ -658,7 +658,7 @@ function addEntryForm(&$username, &$patientId, &$uid)
         print pacsone_gettext("Transcription Template:");
         print "</td>";
         print "<td>" . sprintf(pacsone_gettext("Transcription template: <u>%s</u> is pre-defined for this study"), $template);
-        print "&nbsp;<input type=submit name='action' value='";
+        print "&nbsp;<input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Download") . "' title='";
         print pacsone_gettext("Download Pre-defined Transcription Template");
         print "' onclick='switchText(this.form,\"studynoteaction\",\"Xscript\")'>\n";
@@ -869,7 +869,7 @@ function modifyEntryForm(&$username, &$patientId, &$uid)
         }
     }
     // add any new attachments
-    print "<br><input class=\"btn btn-primary\" type=file name='attachfile' size=64 $disabled><br>\n";
+    print "<br><input class='filestyle' type=file name='attachfile' size=64 $disabled><br>\n";
     print pacsone_gettext("(The following file types can be attached)");
     print "<br><b>";
     foreach ($MIME_TBL as $ext => $mimetype) {
@@ -893,7 +893,7 @@ function modifyEntryForm(&$username, &$patientId, &$uid)
             print "<img src='attachment.gif' border=0>";
             print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
         }
-        print "<br><input type=submit name='action' value='";
+        print "<br><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Unattach");
         print "' onclick='switchText(this.form,\"studynoteaction\",\"Unattach\")'>\n";
     }
@@ -908,7 +908,7 @@ function modifyEntryForm(&$username, &$patientId, &$uid)
         print pacsone_gettext("Transcription Template:");
         print "</td>";
         print "<td>" . sprintf(pacsone_gettext("Transcription template: <u>%s</u> is pre-defined for this study"), $template);
-        print "&nbsp;<input type=submit name='action' value='";
+        print "&nbsp;<input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Download") . "' title='";
         print pacsone_gettext("Download Pre-defined Transcription Template");
         print "' onclick='switchText(this.form,\"studynoteaction\",\"Xscript\")'>\n";
@@ -1155,7 +1155,7 @@ function viewNotesForm(&$username, &$patientId, &$uid)
         print "<td><input class=\"btn btn-primary\" type=button value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'>&nbsp;\n";
     }
 
-    print "<input type=submit class=\"btn btn-primary\" value='";
+    print "<input class='btn btn-primary' type=submit class=\"btn btn-primary\" value='";
     print pacsone_gettext("Add");
     print "' name='action' title='";
     print pacsone_gettext("Add New Study Note");
@@ -1195,7 +1195,7 @@ function viewNotesForm(&$username, &$patientId, &$uid)
         $result = $dbcon->query("select * from smtp");
         if ($result && $result->rowCount()) {
             print "<tr><td>";
-            print "<input type=submit value='";
+            print "<input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Email Study Notes To");
             print "' name='action' title='";
             print pacsone_gettext("Email Selected Study Notes To Specified Email Address (es)");

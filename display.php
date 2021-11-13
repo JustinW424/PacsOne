@@ -297,12 +297,13 @@ function buildStartBtnGroupAnimation(){
 
 
 
-function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $pagination)
+function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $pagination, $ShowHideControl = 1)
 {
     // add by rina  2021.11.06
     print "<table class='table' style='width:100%; margin-bottom:0px'>\n";
             print "<tr>\n";
             
+    if($ShowHideControl == 1){
             print "<td width=\"20px\">\n";
                 //print "<i class=\"fas fa-cloud\" style=\"font-size:60px;\"></i>\n";
                 //print "<input type=\"button\" style=\"border-radius: 80%;\" class=\"fa fa-car expanButtonBG\" value='...' onClick=\"startBtnGroupAnimation()\"></input>\n";
@@ -313,9 +314,13 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
             
             print "<td style='width:62%'>\n";
 
-    print "<div id=\"btnGroupID\" class=\"btn-group\" style=\"margin-left:-1000px;\">\n";
+            print "<div id=\"btnGroupID\" class=\"btn-group\" style=\"margin-left:-1000px;\">\n";
 
-    buildStartBtnGroupAnimation();
+            buildStartBtnGroupAnimation();
+    }else{
+        print "<td style='width:62%'>\n";
+    }        
+        
 
     $check = pacsone_gettext("Check All");
     $uncheck = pacsone_gettext("Uncheck All");
@@ -360,10 +365,60 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
             print $line;
         }
     }
-    print "</div></td>
-            <td>$pagination</td>\n";
+
+    print "<td><input type=hidden value='$level' name='option'></td>\n";
+    if (isset($hidden)) {
+        foreach ($hidden as $name => $value) {
+            print "<input type=hidden value='$value' name='$name'>\n";
+        }
+    }
+
+    if($ShowHideControl == 1){
+        print "</div></td>\n";
+    }
+    else{
+        print "</td>\n";
+    }
+
+    print "<td>$pagination</td>\n";
+
     print "<td style='float:right'><input class='form-control' id='myInput' type='text' placeholder='Search..'></td>\n";
-    print "</tr></table>\n";
+    print "</tr>\n";
+
+    //print "ajaxbutton=".$ajaxButton."\n";
+
+    if ($ajaxButton) {
+        
+        print "<tr>";
+        print "<td colspan=6><div style=\"display:none\" id=\"preloader\"><img src=\"ajax-loader.gif\"/>";
+        print "<br><h3>";
+        print pacsone_gettext("Please wait while your request is being processed...");
+        print "</h3></div>";
+        print "<div id=\"resultDiv\" style=\"display:none\"></div></td>";
+        print "</tr>\n";
+
+/*
+        // process with java script
+        // because ajax downloading line is displayed below button control.
+        // so to process with javascript, that can be displayed to top of button control
+
+        print "<script>\n";
+
+        print "var strInner='';\n";
+        print "strInner += '<td colspan=6><div style=\"display:none\" id=\"preloader\"><img src=\"ajax-loader.gif\"/>';\n";
+        print "strInner += '<br><h3>';\n";
+        print "strInner += 'Please wait while your request is being processed...';\n";
+        print "strInner += '</h3></div>';\n";
+        print "strInner += '<div id=\"resultDiv\" style=\"display:none\"></div></td>';\n";
+        print "$(\"#ajaxDownloadingDisplay\").html(strInner);\n";
+
+        print "</script>\n";
+
+*/
+
+    }
+
+    print "</table>\n";
     
 
     
@@ -491,7 +546,7 @@ function displayPatients($list, $preface, $url, $offset, $all, $duplicates = 0)
             global $DUPLICATE_FILTER_THIS_YEAR;
             global $DUPLICATE_FILTER_DATE_RANGE;
             print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5>\n";
-            //print "<tr class=listhead bgcolor=$BGCOLOR><td>\n";
+            
             print "<tr class='tableHeadForBGUp'><td>\n";
             print pacsone_gettext("Limit the display of Duplicate Patient IDs by the following filter:");
             print "</td></tr>";
@@ -1075,6 +1130,8 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     if ($result && ($row = $result->fetch(PDO::FETCH_NUM)))
         $skipSeries = $row[0];
     
+    //print "<table><tr id='ajaxDownloadingDisplay'></tr></table>"; // add by rina
+
     $data = displayPageControl(pacsone_gettext("Studies"), $list, $preface, $url, $offset, $all);
     $rows = $data["rows"];
     $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
@@ -1185,7 +1242,8 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
     }
 
     // display studies. ========================================
-    print "<div class=\"row\">\n";
+
+    //print "<div class=\"row\">\n";
 
     print "<div class=\"tableFixHead\">\n";
     
@@ -1382,7 +1440,7 @@ function displayStudies($list, $preface, $url, $offset, $showPatientId, $all, $s
   print "</table>\n";
   
   print "</div>\n";
-  print "</div>\n";
+  //print "</div>\n";
 
 /*
     print "<table width=100% border=0 cellpadding=3 class='mouseover optionrow'>\n";
@@ -1590,7 +1648,7 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
     global $BGCOLOR;
     global $MYFONT;
     global $CUSTOMIZE_PATIENT;
-    print "<table class=\"table table-bordered\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<table style='background-color:transparent;' class=\"table-bordered\" width=100% border=0 cellspacing=5 cellpadding=0>\n";
     print "<tr valign=top>";
     if ($showStudyNotes) {
         print "<td width=\"20%\">"; // -----  Left panel
@@ -1654,8 +1712,11 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
         if ($dbcon->getAutoConvertJPG()) {
             $buttons['Download JPG'] = array(pacsone_gettext('Download JPG'), pacsone_gettext('Download converted JPG/GIF images of checked series'), $downloadAccess);
         }
-        displayButtons("series", $buttons, null);
+        
+        displayButtons("series", $buttons, null, sizeof($rows), $pagination, 0);
     }
+
+
     // check if need to toggle sorting order
     if (isset($_SESSION['sortToggle'])) {
         $toggle = 1 - $_SESSION['sortToggle'];
@@ -1678,8 +1739,8 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
         pacsone_gettext("Operator Name")    => "operatorname",
         pacsone_gettext("Total Instances")  => "instances",
         pacsone_gettext("Description")      => "description");
-    print "<table class=\"table\" width=100% border=0 cellpadding=5>\n";
-    print "<tr class=\"success\">\n";
+    print "<table class=\"table table-hover table-bordered table-striped\" width=100% border=0 cellpadding=5>\n";
+    print "<tr class=\"tableHeadForBGUp\">\n";
     if ($checkbox) {
         print "\t<td></td>\n";
     }
@@ -1699,7 +1760,7 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
             print "\t<td><b>$key</b></td>\n";
         }
     }
-    print "</tr class=\"Danger\">\n";
+    print "</tr>\n";
     // find patient id
     if ($showStudyNotes && count($rows)) {
         $studyUid = $rows[0]['studyuid'];
@@ -1721,7 +1782,7 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
     }
     foreach ($rows as $row) {
         $uid = $row['uuid'];
-        print "<tr class=\"Info\">\n";
+        print "<tr style='background-color:white;'>\n";
         if ($checkbox) {
 	        print "\t<td align=center width='1%'>\n";
 	        print "\t\t<input type='checkbox' name='entry[]' value='$uid'></td>\n";
@@ -1781,8 +1842,9 @@ function displaySeries(&$list, $preface, $url, $offset, $all, $tagged, $showStud
         print "</tr>\n";
     }
     print "</table>\n";
+
     if ($checkbox) {
-        displayButtons("series", $buttons, null);
+        // displayButtons("series", $buttons, null); // removed by rina
 	    print "</form>\n";
     }
     // show link to display all tagged images
@@ -1804,7 +1866,7 @@ function displayImage(&$list, $preface, $url, $offset, $all, $showStudyNotes)
     // display Study Notes
     global $BGCOLOR;
     global $TAGCOLOR;
-    print "<table width=100% border=0 cellspacing=5 cellpadding=0>\n";
+    print "<table class='table table-bordered table-hover table-striped' width=100% border=0 cellspacing=5 cellpadding=0>\n";
     print "<tr valign=top>";
     if ($showStudyNotes) {
         print "<td class=notes>";
@@ -1814,7 +1876,7 @@ function displayImage(&$list, $preface, $url, $offset, $all, $showStudyNotes)
         parse_str($suburl, $params);
         displayStudyNotes($params['studyId']);
         print "</td>";
-        print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
+        //print "<td width=1 bgcolor=$BGCOLOR><img src=blank.gif width=1 height=1></td>";
     }
     print "<td>";
     global $MYFONT;
@@ -1860,7 +1922,8 @@ function displayImage(&$list, $preface, $url, $offset, $all, $showStudyNotes)
         if ($dbcon->getAutoConvertJPG()) {
             $buttons['Download JPG'] = array(pacsone_gettext('Download JPG'), pacsone_gettext('Download converted JPG/GIF images of checked images'), $downloadAccess);
         }
-        displayButtons("image", $buttons, null);
+
+        displayButtons("image", $buttons, null, sizeof($rows), $pagination, 0);
 	}
     // get the thumbnail directory if configured
     $thumbnaildir = "";
@@ -2016,7 +2079,7 @@ function displayImage(&$list, $preface, $url, $offset, $all, $showStudyNotes)
     }
 	print "</table>\n";
 	if ($checkbox && count($rows)) {
-        displayButtons("image", $buttons, null);
+        displayButtons("image", $buttons, null, sizeof($rows), $pagination);
     	print "</form>\n";
 	}
     print "</td></tr>";
@@ -2047,8 +2110,8 @@ function displayApplEntity($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     global $XFER_SYNTAX_TBL;
-    print "<div style='overflow:scroll;'>\n";
-    print "<table class='table table-striped table-bordered' width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
+    print "<div class=\"rows\" style='overflow:auto;'>\n";
+    print "<table class='table table-hover table-striped table-bordered' width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
     print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
@@ -2280,6 +2343,7 @@ function displayJobStatus($result, $preface, $status, $type, $url, $offset, $all
     $data = displayPageControl(pacsone_gettext("Jobs"), $list, $preface, $url, $offset, $all);
     $rows = $data["rows"]; // add by rina
     $pagination = isset($data["pagination"]) ? $data["pagination"] : "";
+    displayPagenation($pagination);
 
     // check whether to bypass Series level
     $skipSeries = 0;
@@ -2534,11 +2598,11 @@ function displayRemotePatients($aetitle, &$identifier, &$matches)
     } else {
 	    printf(pacsone_gettext("Remote AE <b>%s</b> returned %d match:<P>"), $aetitle, $count);
     }
-    print "<table width=100% border=0 cellpadding=5>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
     print "<form method='POST' action='moveForm.php'>\n";
 	print "<input type='hidden' name='source' value='$aetitle'></input>";
 	$attrs = $identifier->attrs;
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	$checkbox = 0;
 	if ($moveAccess && $count) {
 		$checkbox = 1;
@@ -2552,7 +2616,7 @@ function displayRemotePatients($aetitle, &$identifier, &$matches)
 	foreach ($matches as $match) {
         if (!count($match->attrs))
             continue;
-		print "<tr>";
+		print "<tr style='background-color:white;'>";
 		$level = $match->getQueryLevel();
 		print "<input type='hidden' name='level[]' value=$level>";
 		if ($checkbox) {
@@ -2584,7 +2648,7 @@ function displayRemotePatients($aetitle, &$identifier, &$matches)
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
     	print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'</input></td>\n";
-    	print "<td><input type=submit value='";
+    	print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Move");
         print "' title='";
         print pacsone_gettext("Move Selected Patients");
@@ -2613,11 +2677,11 @@ function displayRemoteStudies($aetitle, &$identifier, &$matches)
     } else {
 	    printf(pacsone_gettext("Remote AE <b>%s</b> returned %d match:<P>"), $aetitle, $count);
     }
-    print "<table width=100% border=0 cellpadding=5>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
     print "<form method='POST' action='moveForm.php'>\n";
 	print "<input type='hidden' name='source' value='$aetitle'></input>";
 	$attrs = $identifier->attrs;
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	$checkbox = 0;
 	if ($moveAccess && $count) {
 		$checkbox = 1;
@@ -2635,7 +2699,7 @@ function displayRemoteStudies($aetitle, &$identifier, &$matches)
 	foreach ($matches as $match) {
         if (!count($match->attrs))
             continue;
-		print "<tr>";
+		print "<tr style='background-color:white;'>";
 		$level = $match->getQueryLevel();
 		print "<input type='hidden' name='level[]' value=$level>";
 		if ($checkbox) {
@@ -2679,7 +2743,7 @@ function displayRemoteStudies($aetitle, &$identifier, &$matches)
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
     	print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'</input></td>\n";
-    	print "<td><input type=submit value='";
+    	print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Move");
         print "' title='";
         print pacsone_gettext("Move Selected Studies");
@@ -2703,11 +2767,11 @@ function displayRemoteSeries($aetitle, &$identifier, &$matches)
     } else {
 	    printf(pacsone_gettext("Remote AE <b>%s</b> returned %d match:<P>"), $aetitle, $count);
     }
-    print "<table width=100% border=0 cellpadding=5>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
     print "<form method='POST' action='moveForm.php'>\n";
 	print "<input type='hidden' name='source' value='$aetitle'></input>";
 	$attrs = $identifier->getDisplayAttrs();
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	$checkbox = 0;
 	if ($moveAccess && $count) {
 		$checkbox = 1;
@@ -2721,7 +2785,7 @@ function displayRemoteSeries($aetitle, &$identifier, &$matches)
 	foreach ($matches as $match) {
         if (!count($match->attrs))
             continue;
-		print "<tr>";
+		print "<tr style='background-color:white;'>";
 		$level = $match->getQueryLevel();
 		print "<input type='hidden' name='level[]' value=$level>";
 		if ($checkbox) {
@@ -2765,7 +2829,7 @@ function displayRemoteSeries($aetitle, &$identifier, &$matches)
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
     	print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'</input></td>\n";
-    	print "<td><input type=submit value='";
+    	print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Move");
         print "' title='";
         print pacsone_gettext("Move Selected Series");
@@ -2789,11 +2853,11 @@ function displayRemoteImage($aetitle, &$identifier, &$matches)
     } else {
 	    printf(pacsone_gettext("Remote AE <b>%s</b> returned %d match:<P>"), $aetitle, $count);
     }
-    print "<table width=100% border=0 cellpadding=5>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
     print "<form method='POST' action='moveForm.php'>\n";
 	print "<input type='hidden' name='source' value='$aetitle'></input>";
 	$attrs = $identifier->getDisplayAttrs();
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	$checkbox = 0;
 	if ($moveAccess && $count) {
 		$checkbox = 1;
@@ -2807,7 +2871,7 @@ function displayRemoteImage($aetitle, &$identifier, &$matches)
 	foreach ($matches as $match) {
         if (!count($match->attrs))
             continue;
-		print "<tr>";
+		print "<tr style='background-color:white;'>";
 		$level = $match->getQueryLevel();
 		print "<input type='hidden' name='level[]' value=$level>";
 		if ($checkbox) {
@@ -2857,7 +2921,7 @@ function displayRemoteImage($aetitle, &$identifier, &$matches)
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
     	print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'</input></td>\n";
-    	print "<td><input type=submit value='";
+    	print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Move");
         print "' title='";
         print pacsone_gettext("Move Selected Images");
@@ -2881,11 +2945,11 @@ function displayRemoteImageDetails($aetitle, &$identifier, &$matches)
     } else {
 	    printf(pacsone_gettext("Remote AE <b>%s</b> returned %d match:<P>"), $aetitle, $count);
     }
-    print "<table width=100% border=0 cellpadding=5>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
     print "<form method='POST' action='moveForm.php'>\n";
 	print "<input type='hidden' name='source' value='$aetitle'></input>";
 	$attrs = $identifier->getDisplayAttrs();
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	$checkbox = 0;
 	if ($moveAccess && $count) {
 		$checkbox = 1;
@@ -2899,7 +2963,7 @@ function displayRemoteImageDetails($aetitle, &$identifier, &$matches)
 	foreach ($matches as $match) {
         if (!count($match->attrs))
             continue;
-		print "<tr>";
+		print "<tr style='background-color:white;'>";
 		$level = $match->getQueryLevel();
 		print "<input type='hidden' name='level[]' value=$level>";
 		if ($checkbox) {
@@ -2941,7 +3005,7 @@ function displayRemoteImageDetails($aetitle, &$identifier, &$matches)
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
     	print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'</input></td>\n";
-    	print "<td><input type=submit value='";
+    	print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Move");
         print "' title='";
         print pacsone_gettext("Move Selected Images");
@@ -2971,13 +3035,12 @@ function displayUsers($result, $preface, $ldap = 0)
     // display all columns
     global $BGCOLOR;
     global $MYFONT;
-    print "<div class=\"rows\" style=\"overflow: scroll;\">\n";
+    print "<div class=\"rows\" style=\"overflow: auto;\">\n";
     print "<table class=\"table table-striped table-bordered\" width=100% border=0 cellpadding=3 class='mouseover optionrow'>\n";
     print "<form method='POST' action='modifyUser.php'>\n";
     print "<input type='hidden' name='actionvalue'>\n";
     if ($ldap)
         print "<input type='hidden' name='ldap' value=1>\n";
-    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
     print "<tr class='tableHeadForBGUp'>\n";
 	if ($records) {
     	print "\t<td></td>\n";
@@ -3084,7 +3147,7 @@ function displayExistingUsers($users, $preface, $external)
     $check = pacsone_gettext("Check All");
     $uncheck = pacsone_gettext("Uncheck All");
     print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-    print "<td><input type=submit value='";
+    print "<td><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Upgrade");
     print "' name='action' title='";
     print pacsone_gettext("Upgrade Selected Users");
@@ -3332,7 +3395,7 @@ function displayRemoteWorklist($aetitle, &$identifier, &$matches, $imported)
     } else {
 	    printf(pacsone_gettext("<br>Remote Modality Worklist SCP <b>%s</b> returned <b>%d</b> worklist item:"), $aetitle, $count);
     }
-    print "<table width=100% border=1 cellpadding=1>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=1 cellpadding=1>\n";
     // display the following tabed pages
     $tabs = array (
         sprintf(pacsone_gettext("%s Identification"), $CUSTOMIZE_PATIENT)    => array (
@@ -3399,13 +3462,13 @@ function displayRemoteWorklist($aetitle, &$identifier, &$matches, $imported)
                                                      0x00081155 => 0x00081120
                                                      );
     // display the returned matches
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	foreach ($tabs as $key => $tab) {
 	    print "<td><b>$key</b></td>";
 	}
     print "</tr>\n";
     foreach ($matches as $match) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
 	    foreach ($tabs as $key => $tab) {
 		    print "<td><table width=100% border=1 cellpadding=0>\n";
 		    foreach ($tab as $tabkey => $tabvalue) {
@@ -3755,7 +3818,7 @@ function displayWorklistItem($page, $row)
         print "<form method='POST' action='actionItem.php'>\n";
     	print "<tr><td><table width=20% border=0 cellspacing=0 cellpadding=5>\n";
         print "<tr>\n";
-       	print "<td><input type=submit value='";
+       	print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete current worklist item");
@@ -3960,10 +4023,10 @@ function displayStudiesForExport(&$selected, $preface, $url, $offset, $all, $zip
         "purge"  => $purge,
         "sort"    => $sort);
     print "<form method='POST' action='export.php'>\n";
-    displayButtons("study", $buttons, $hidden);
-    print "<table width=100% border=0 cellpadding=5>\n";
+    displayButtons("study", $buttons, $hidden, sizeof($rows), $pagination);
+    print "<table class='table table-hover table-striped table-bordered'width=100% border=0 cellpadding=5>\n";
     global $BGCOLOR;
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     print "\t<td></td>\n";
     foreach (array_keys($columns) as $key) {
         if (isset($links[$key])) {
@@ -3977,7 +4040,7 @@ function displayStudiesForExport(&$selected, $preface, $url, $offset, $all, $zip
     // display the sorted studies
     foreach ($rows as $study) {
         $uid = $study['UID'];
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
         print "\t<td align=center width='1%'>\n";
         $checked = "";
         foreach ($selected as $entry) {
@@ -4001,8 +4064,7 @@ function displayStudiesForExport(&$selected, $preface, $url, $offset, $all, $zip
         print "</tr>\n";
     }
     print "</table>\n";
-    displayButtons("study", $buttons, $hidden);
-    displayPageControl(pacsone_gettext("Studies"), $studies, $preface, $url, $offset, $all);
+
     print "</form>\n";
 }
 
@@ -4016,8 +4078,8 @@ function displayPrinterAttrs($aetitle, &$list) {
     print "</td></tr>\n";
     print "<tr><td><br></td></tr>\n";
     print "<tr><td>\n";
-    print "<table width=100% cellpadding=3 cellspacing=0 border=1>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% cellpadding=3 cellspacing=0 border=1>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     $columns = array(pacsone_gettext("Property"), pacsone_gettext("Value"));
     foreach ($columns as $key) {
         print "<td><b>$key</b></td>\n";
@@ -4035,7 +4097,7 @@ function displayPrinterAttrs($aetitle, &$list) {
             $value = pacsone_gettext("Sequence");
         else
             $value = trim($attr);
-        print "<tr><td>$name</td>";
+        print "<tr style='background-color:white;'><td>$name</td>";
         if (empty($value))
             $value = "&nbsp;";
         print "<td>$value</td></tr>\n";
@@ -4079,9 +4141,9 @@ function displayExportedPatients(&$uids)
         $CUSTOMIZE_PATIENT_SEX              => "sex",
         $CUSTOMIZE_PATIENT_AGE              => "age",
     );
-    print "<table width=100% cellpadding=0 cellspacing=0 border=1>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% cellpadding=0 cellspacing=0 border=1>\n";
     global $BGCOLOR;
-    print "<tr bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     foreach (array_keys($columns) as $key) {
         print "\t<td><b>$key</b></td>\n";
     }
@@ -4092,7 +4154,7 @@ function displayExportedPatients(&$uids)
         $bindList = array($uid);
         $result = $dbcon->preparedStmt($query, $bindList);
         if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-            print "<tr>\n";
+            print "<tr style='background-color:white;'>\n";
             foreach ($columns as $key => $field) {
                 if (strcasecmp($key, $CUSTOMIZE_PATIENT_NAME) == 0) {
                     $value = $row["firstname"] . " ";
@@ -4126,9 +4188,9 @@ function displayExportedStudies(&$uids)
         pacsone_gettext("Accession Number")     => "accessionnum",
         pacsone_gettext("Study Description")    => "description",
     );
-    print "<table width=100% cellpadding=0 cellspacing=0 border=1>\n";
+    print "<table class='table table-hover table-striped table-bordered' width=100% cellpadding=0 cellspacing=0 border=1>\n";
     global $BGCOLOR;
-    print "<tr bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     print "\t<td><b>$CUSTOMIZE_PATIENT_ID</b></td>\n";
     print "\t<td><b>$CUSTOMIZE_PATIENT_NAME</b></td>\n";
     foreach (array_keys($columns) as $key) {
@@ -4140,7 +4202,7 @@ function displayExportedStudies(&$uids)
         $bindList = array($uid);
         $result = $dbcon->preparedStmt($query, $bindList);
         if ($result && $study = $result->fetch(PDO::FETCH_ASSOC)) {
-            print "<tr>\n";
+            print "<tr style='background-color:white;'>\n";
             $patientId = $study["patientid"];
             print "<td>" . $patientId . "</td>\n";
             $subq = "SELECT * FROM patient WHERE origid=?";
@@ -4179,9 +4241,9 @@ function displayExportedSeries(&$uids)
         pacsone_gettext("Body Part")        => "bodypart",
         pacsone_gettext("Description")      => "description",
     );
-    print "<table width=100% cellpadding=0 cellspacing=0 border=1>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% cellpadding=0 cellspacing=0 border=1>\n";
     global $BGCOLOR;
-    print "<tr bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     print "\t<td><b>$CUSTOMIZE_PATIENT_ID</b></td>\n";
     print "\t<td><b>$CUSTOMIZE_PATIENT_NAME</b></td>\n";
     print "\t<td><b>";
@@ -4196,7 +4258,7 @@ function displayExportedSeries(&$uids)
         $bindList = array($uid);
         $result = $dbcon->preparedStmt($query, $bindList);
         if ($result && $series = $result->fetch(PDO::FETCH_ASSOC)) {
-            print "<tr>\n";
+            print "<tr style='background-color:white;'>\n";
             $studyUid = $series["studyuid"];
             $subq = "SELECT patientid,id FROM study WHERE uuid=?";
             $subList = array($studyUid);
@@ -4238,9 +4300,9 @@ function displayExportedImages(&$uids)
     $columns = array(
         pacsone_gettext("Instance Number")          => "instance",
     );
-    print "<table width=100% cellpadding=0 cellspacing=0 border=1>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% cellpadding=0 cellspacing=0 border=1>\n";
     global $BGCOLOR;
-    print "<tr bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     print "\t<td><b>$CUSTOMIZE_PATIENT_ID</b></td>\n";
     print "\t<td><b>$CUSTOMIZE_PATIENT_NAME</b></td>\n";
     print "\t<td><b>";
@@ -4260,7 +4322,7 @@ function displayExportedImages(&$uids)
         $bindList = array($uid);
         $result = $dbcon->preparedStmt("SELECT * FROM image WHERE uuid=?", $bindList);
         if ($instance = $result->fetch(PDO::FETCH_ASSOC)) {
-            print "<tr>\n";
+            print "<tr style='background-color:white;'>\n";
             $seriesUid = $instance["seriesuid"];
             $result = $dbcon->query("SELECT studyuid,seriesnumber,seriesdate FROM series WHERE uuid='$seriesUid'");
             $series = $result->fetch(PDO::FETCH_NUM);
@@ -4415,7 +4477,7 @@ function displayStatReport($list, $preface, $url, $offset, $all, $type)
             'Export'    => array(pacsone_gettext('Export'), pacsone_gettext('Export checked studies'), $exportAccess),
         );
         print "<form method='POST' action='actionItem.php'>\n";
-        displayButtons("study", $buttons, null);
+        displayButtons("study", $buttons, null, sizeof($rows), $pagination);
     }
     $url = urlReplace($url, "type", $type);
     // check if need to toggle sorting order
@@ -4446,9 +4508,9 @@ function displayStatReport($list, $preface, $url, $offset, $all, $type)
         pacsone_gettext("Source AE")                => "sourceae",
         pacsone_gettext("Number of Images")         => "images",
         pacsone_gettext("Total Size")               => "size");
-    print "<table width=100% border=0 cellpadding=5>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
     global $BGCOLOR;
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     if ($checkbox) {
         print "\t<td></td>\n";
     }
@@ -4471,7 +4533,7 @@ function displayStatReport($list, $preface, $url, $offset, $all, $type)
     print "</tr>\n";
     foreach ($rows as $row) {
 		$uid = $row['uuid'];
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
         if ($checkbox) {
 	        print "\t<td align=center width='1%'>\n";
             $data = $row['uuid'];
@@ -4532,7 +4594,7 @@ function displayStatReport($list, $preface, $url, $offset, $all, $type)
     }
     print "</table>\n";
     if ($checkbox) {
-        displayButtons("study", $buttons, null);
+        displayButtons("study", $buttons, null, sizeof($rows), $pagination);
 	    print "</form>\n";
     }
     $result = $dbcon->query("select * from smtp");
@@ -4546,7 +4608,7 @@ function displayStatReport($list, $preface, $url, $offset, $all, $type)
             $uid = $row['uuid'];
             print "<input type=hidden name='studies[]' value='$uid'>";
         }
-        print "<input type=submit value='";
+        print "<input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Email Report To Me");
         print "'>";
         print "</form>\n";
@@ -4724,7 +4786,7 @@ function displayImageNotes(&$uid)
         print "<form method='POST' action='imageNotes.php'>\n";
         print "<input type='hidden' name='imagenoteaction'>\n";
         print "<p><input type=hidden name='uid' value='$uid'>\n";
-        print "<input type=submit value='";
+        print "<input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add New Image Note");
@@ -4764,7 +4826,6 @@ function displayNotes($table, &$rows, $username, $url, $checkbox, $showExtra)
         printf(pacsone_gettext("There are %d notes for this %s"), $notes, $what);
     print "<p><table class=\"table table-bordered  table-striped\" width='100%' border=0 cellpadding=2 cellspacing=0>\n";
 
-    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
     print "<tr class=\"tableHeadForBGUp\">\n"; // -------------------
 
     if ($modifyAccess && $checkbox)
@@ -5014,6 +5075,7 @@ function displayExportForm($level, &$exportdir)
     global $EXPORT_MEDIA;
     print pacsone_gettext("Export To Local Directory: \n");
     print "<input style='margin-left:174px;' type=text name='exportdir' size=64 maxlength=256 value='$exportdir'></input><br>";
+    print "<div style='height:0px;'></div>\n";
     print pacsone_gettext("Export Media Size: ");
     print "<select style='margin-left:217px;' name='media'>\n";
     foreach ($EXPORT_MEDIA as $type => $size) {
@@ -5025,7 +5087,8 @@ function displayExportForm($level, &$exportdir)
     $label = "";
     if (isset($_SESSION['ExportMediaLabel']))
         $label = $_SESSION['ExportMediaLabel'];
-    print "<br>" . pacsone_gettext("Media Label: ");
+    print "<div style='height:8px;'></div>\n";
+    print pacsone_gettext("Media Label: ");
     print "<input style='margin-left:254px;' type=text name='label' size=16 maxlength=16 value=$label></input>";
     print "<br><input type=checkbox name='zip' value=1>";
     print pacsone_gettext("Compress exported content into ZIP file");
@@ -5079,8 +5142,8 @@ function displayHL7App($result, $preface)
     // display all columns
     global $BGCOLOR;
     global $MYFONT;
-    print "<table width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5 class='mouseover optionrow'>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -5135,7 +5198,7 @@ function displayHL7App($result, $preface)
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
             print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete checked HL7 applications");
@@ -5143,7 +5206,7 @@ function displayHL7App($result, $preface)
             print pacsone_gettext("Are you sure?");
             print "\");'></td>\n";
         }
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add new HL7 application");
@@ -5178,8 +5241,8 @@ function displayHL7Route($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     print "<tr><td>\n";
-    print "<table width=100% border=0 cellpadding=5>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
 	if ($access && $records) {
         print "\t<td></td>\n";
 	}
@@ -5199,7 +5262,7 @@ function displayHL7Route($result, $preface)
     print "\t<td><b>$control</b></td>\n";
     print "</tr>\n";
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
         $source = $row['source'];
         $keyname = $row['keyname'];
         $destination = $row['destination'];
@@ -5259,25 +5322,25 @@ function displayHL7Route($result, $preface)
             $uncheck = pacsone_gettext("Uncheck All");
             print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
         }
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add New HL7 Message Routing Rule");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Add\")'></td>\n";
         if ($records) {
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete Checked HL7 Message Routing Rules");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Delete\");return confirm(\"";
             print pacsone_gettext("Are you sure?");
             print "\");'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Enable All");
             print "' name='action' title='";
             print pacsone_gettext("Enable All HL7 Message Routing Rules");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Enable All\")'></td>\n";
-            print "<td><input type=submit value='";
+            print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Disable All");
             print "' name='action' title='";
             print pacsone_gettext("Disable All HL7 Message Routing Rules");
@@ -5309,13 +5372,13 @@ function displayGroups($result, $preface, $ldap = 0)
     // display all columns
     global $BGCOLOR;
     global $MYFONT;
-    print "<div class=\"rows\" style=\"overflow: scroll;\">\n";
+    print "<div class=\"rows\" style=\"overflow: auto;\">\n";
     print "<table class=\"table table-striped table-bordered\" width=100% border=0 cellpadding=3>\n";
     print "<form method='POST' action='modifyUser.php'>\n";
     print "<input type='hidden' name='actionvalue'>\n";
     if ($ldap)
         print "<input type='hidden' name='ldap' value=1>\n";
-    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    
     print "<tr class='tableHeadForBGUp'>\n";
     $columns = $USER_PRIVILEGE_TBL;
     $columns["lastname"] = pacsone_gettext("Group Name");
@@ -5407,8 +5470,8 @@ function displayLiveMonitor($result, $preface)
     global $BGCOLOR;
     global $MYFONT;
     print "<tr><td>\n";
-    print "<table width=100% border=0 cellpadding=5>\n";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
+    print "<tr class='tableHeadForBGUp'>\n";
     // display the following columns: column name <=> database field
     global $CUSTOMIZE_PATIENT_NAME;
     $columns = array(
@@ -5435,7 +5498,7 @@ function displayLiveMonitor($result, $preface)
     }
     print "</tr>\n";
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        print "<tr>\n";
+        print "<tr style='background-color:white;'>\n";
         print "\t<td align=center width='1%'>\n";
         $data = urlencode($row['id']);
         print "\t\t<input type='checkbox' name='entry[]' value='$data'></td>\n";
@@ -5464,7 +5527,7 @@ function displayLiveMonitor($result, $preface)
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
         print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-        print "<td><input type=submit name='action' value='";
+        print "<td><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Delete");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Delete\");return confirm(\"";
         print pacsone_gettext("Are you sure?");
@@ -6280,7 +6343,7 @@ function displayUserSignups($result, $preface)
     // display all columns
     global $BGCOLOR;
     global $MYFONT;
-    print "<div class=\"rows\" style=\"overflow: scroll;\">\n";
+    print "<div class=\"rows\" style=\"overflow: auto;\">\n";
     print "<table class=\"table table-striped table-bordered\" width=100% border=0 cellpadding=3>\n";
     print "<form method='POST' action='modifyUserSignup.php'>\n";
     print "<input type='hidden' name='actionvalue'>\n";
@@ -6291,7 +6354,7 @@ function displayUserSignups($result, $preface)
         "email"         => pacsone_gettext("Email Address"),
         "submitted"     => pacsone_gettext("Sign-Up Request Submitted"),
     );
-    //print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    
     print "<tr class='tableHeadForBGUp'>\n";
 
    	print "\t<td></td>\n";

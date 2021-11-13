@@ -284,7 +284,7 @@ if (isset($_POST['keep'])) {
             }
             print "</DD><br>\n";
         }
-        print "<p><input type=submit value='";
+        print "<p><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Resolve");
         print "' title='";
         printf(pacsone_gettext("Resolve Duplicate %s"), $CUSTOMIZE_PATIENT_ID);

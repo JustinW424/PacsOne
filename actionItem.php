@@ -714,7 +714,7 @@ if (strcasecmp($action, "Export") == 0 && isset($option)) {
     print ":</td></tr>\n";
 	print "<tr><td><br></td></tr>\n";
 	print "<tr><td>";
-    displayExportItem($option, $entry);
+    displayExportItem($option, $entry);  //---------------------
 	print "</tr></td>";
 	print "<tr><td><br></td></tr>\n";
 	print "<tr><td>";
@@ -732,9 +732,9 @@ if (strcasecmp($action, "Export") == 0 && isset($option)) {
     }
     $exportdir = strlen($preferred)? $preferred : ($directory . "/export/");
     print "<form method=POST action='exportStudy.php'>\n";
-    displayExportForm($option, $exportdir);
+    displayExportForm($option, $exportdir);// --------------------------------------
     $title = pacsone_gettext("Export ") . ucfirst($option);
-    print "<br><input type=submit value='$title' title='$title'><br>";
+    print "<br><input class='btn btn-primary' type=submit value='$title' title='$title'><br>";
     print "<input type=hidden name='option' value=$option>\n";
     foreach ($entry as $uid) {
         print "<input type=hidden name='entry[]' value='$uid'>\n";
@@ -809,9 +809,12 @@ if (strcasecmp($action, "Change Storage") == 0 && isset($option)) {
         print "&nbsp;$uid<br>\n";
     }
     print "</td></tr>";
+
     print "<tr><td>";
+   // print "<div style='height:10px;'></div>\n";
     print pacsone_gettext("Please select new storage location:");
     print "</td><td>";
+     print "<div style='height:10px;'></div>\n";
     print "<input type='radio' name='userdir' value=0 checked>";
     print pacsone_gettext("Select from the list of currently defined Archive Directories:");
     print "&nbsp;<select name='selectdir'>";
@@ -819,6 +822,7 @@ if (strcasecmp($action, "Change Storage") == 0 && isset($option)) {
         print "<option>$value</option>";
     }
     print "</select>\n";
+
     print "<br><input type='radio' name='userdir' value=1>";
     print pacsone_gettext("Move to this specific directory:");
     print "&nbsp;<input type='text' name='newdir' size=64 maxlength=255>";
@@ -826,7 +830,9 @@ if (strcasecmp($action, "Change Storage") == 0 && isset($option)) {
     print "<tr><td>";
     print pacsone_gettext("Please select move schedule:");
     print "</td>";
-    print "<td><input type='radio' name='schedule' value=-1 checked>";
+    print "<td>\n";
+     print "<div style='height:10px;'></div>\n";
+    print "<input type='radio' name='schedule' value=-1 checked>";
     print pacsone_gettext("Immediately") . "<br>\n";
     print "<input type='radio' name='schedule' value=0>";
     print pacsone_gettext("At this hour: \n");
@@ -844,7 +850,8 @@ if (strcasecmp($action, "Change Storage") == 0 && isset($option)) {
     foreach ($entry as $uid) {
         print "<input type=hidden name='entry[]' value='$uid'>\n";
     }
-    print "<p><input type='submit' value='" . pacsone_gettext("Move") . "'>\n";
+     print "<div style='height:10px;'></div>\n";
+    print "<p><input class='btn btn-primary' type='submit' value='" . pacsone_gettext("Move") . "'>\n";
     print "</form>\n";
     require_once 'footer.php';
     print "</body>\n";

@@ -97,7 +97,7 @@ if (!strcasecmp($status, "failed")) {
         }
     }
     if (count($scanned)) {
-        print "<p><table width=100% border=0 cellpadding=5>\n";
+        print "<p><table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
         global $BGCOLOR;
         global $CUSTOMIZE_PATIENT_ID;
         global $CUSTOMIZE_PATIENT_NAME;
@@ -107,12 +107,12 @@ if (!strcasecmp($status, "failed")) {
             pacsone_gettext("Number of Images"),
             pacsone_gettext("Total Size"),
         );
-        print "<tr class=listhead bgcolor=$BGCOLOR><td></td>";
+        print "<tr class='tableHeadForBGUp'><td></td>";
         foreach ($columns as $key)
             print "<td><b>$key</b></td>";
         print "</tr>";
         foreach ($scanned as $key => $record) {
-            print "<tr>";
+            print "<tr style='background-color:white;'>";
 	        print "<td align=center width='1%'>\n";
 	        print "<input type='checkbox' name='entry[]' value='$key'></td>\n";
             print "<td>$key</td>";

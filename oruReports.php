@@ -31,13 +31,13 @@ $accession = $_REQUEST["accessionnum"];
 print "<p>";
 printf(pacsone_gettext("Observation reports for Accession Number: <u>%s</u>"), $accession);
 print "<p>";
-print "<table width=100% border=1 cellspacing=0 cellpadding=0>\n";
+print "<table class='table table-hover table-bordered table-striped' width=100% border=1 cellspacing=0 cellpadding=0>\n";
 $columns = array(
     pacsone_gettext("Type")         => "valuetype",
     pacsone_gettext("Observation")  => "value",
     pacsone_gettext("Status")       => "resultstatus",
 );
-print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+print "<tr class='tableHeadForBGUp'>\n";
 foreach (array_keys($columns) as $key) {
     print "\t<td><b>$key</b></td>\n";
 }
@@ -45,7 +45,7 @@ print "</tr>";
 $bindList = array($uid);
 $result = $dbcon->preparedStmt("select * from hl7segobx where uuid=?", $bindList);
 while ($result && ($row = $result->fetch(PDO::FETCH_ASSOC))) {
-    print "<tr>";
+    print "<tr style='background-color:white;'>";
     foreach ($columns as $key => $field) {
         $value = $row[$field];
         print "<td>$value</td>";

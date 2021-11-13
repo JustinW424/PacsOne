@@ -181,14 +181,14 @@ function searchExport($username, $uid, $id, $compare, $date, $exportcompare, $ex
                 "id"        => pacsone_gettext("Study ID"),
                 "studydate"      => pacsone_gettext("Study Date"),
             );
-            print "<p><table width=100% border=0 cellpadding=5>\n";
+            print "<p><table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
             global $BGCOLOR;
-            print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+            print "<tr class='tableHeadForBGUp'>\n";
             foreach ($columns as $field => $descrp)
                 print "<td><b>$descrp</b></td>\n";
             print "</tr>\n";
             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                print "<tr class=msgold>\n";
+                print "<tr style='background-color:white;'>\n";
                 foreach ($columns as $field => $descrp) {
                     $value = $row[$field];
                     print "<td>$value</td>\n";

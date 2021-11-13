@@ -67,8 +67,8 @@ if (isset($_POST['update'])) {
     $count = 0;
     $studies = array();
     global $BGCOLOR;
-    print "<br><table width=100% border=1 cellpadding=3>";
-    print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+    print "<br><table class='table table-hover table-bordered table-striped' width=100% border=1 cellpadding=3>";
+    print "<tr class='tableHeadForBGUp'>\n";
     global $CUSTOMIZE_PATIENT_ID;
     global $CUSTOMIZE_REFERRING_DOC;
     print "<td>$CUSTOMIZE_PATIENT_ID</td>";
@@ -103,7 +103,7 @@ if (isset($_POST['update'])) {
         if (!strlen($referdoc))
             $referdoc = pacsone_gettext("N/A");
         $instances = $dbcon->getStudyInstanceCount($studyUid);
-        print "<tr>";
+        print "<tr style='background-color:white;'>";
         print "<td>$pid</td>";
         print "<td>$birthDate</td>";
         print "<td>$studyId</td>";
@@ -134,7 +134,7 @@ if (isset($_POST['update'])) {
     print "&nbsp;<input type=text name='dob' size=16 maxlength=32>";
     print "<p><input type='checkbox' name='checkOnly' checked>&nbsp;";
     print pacsone_gettext("Find but do not delete the matching studies found");
-    print "<p><input type=submit value='Purge' title='";
+    print "<p><input class='btn btn-primary' type=submit value='Purge' title='";
     print pacsone_gettext("Purge Matching Studies");
     print "'>\n";
     print "</form>\n";

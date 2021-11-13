@@ -149,6 +149,9 @@ if (isset($_POST['action']))
 if (isset($_POST['actionvalue']))
 	$action = $_POST['actionvalue'];
 $type = 0;  // default to Completed Jobs view
+
+//print "status.php action ". $action. "\n";
+
 if (isset($_REQUEST['type']))
 	$type = $_REQUEST['type'];
 if (isset($action) && strcasecmp($action, "Retry") == 0) {
@@ -236,6 +239,9 @@ $preface = sprintf(pacsone_gettext("%d pending or failed jobs. Failed jobs will 
 $url = "status.php?type=123";
 displayJobStatus($result, $preface, "failed", -1, $url, $offset, $all);
 if ($dbcon->hasaccess("admin", $username)) {
+
+    //print "admin access\n";
+
     $order = "username";
     if (isset($_REQUEST["order"]) && strlen($_REQUEST["order"]))
         $order = $_REQUEST["order"];

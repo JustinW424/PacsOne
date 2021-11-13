@@ -158,10 +158,10 @@ if ($type == 0) {
     if (!$addUser) {
         print "<p>";
         printf(pacsone_gettext("User privilege configurations for Server Instance:<u>%s</u>"), $instance);
-        print "<p><table width=100% border=0 cellpadding=3 cellspacing=1>";
+        print "<p><table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=3 cellspacing=1>";
         print "<form method='POST' action='multiInstanceUser.php'>";
         print "<input type='hidden' name='actionvalue'>";
-        print "<tr class=listhead bgcolor=$BGCOLOR>";
+        print "<tr class='tableHeadForBGUp'>";
         print "<td rowspan=2></td>";
         print "<td rowspan=2>";
         print pacsone_gettext("Username");
@@ -198,7 +198,7 @@ if ($type == 0) {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
     	    print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'></td>\n";
-    	    print "<td><input type=submit value='";
+    	    print "<td><input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Delete");
             print "' name='action' title='";
             print pacsone_gettext("Delete Selected Users");
@@ -211,7 +211,7 @@ if ($type == 0) {
         print "' name='action' title='";
         print pacsone_gettext("Modify User Privilege Settings");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Modify\")'></td>\n";
-        print "<td><input type=submit value='";
+        print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Add");
         print "' name='action' title='";
         print pacsone_gettext("Add New User");
@@ -308,8 +308,8 @@ if ($type == 0) {
         print "<input type='hidden' name='shareduser' value='$user'>\n";
         print "<table width=100% border=1 cellspacing=0 cellpadding=5>\n";
         print "<tr><td colspan=3>";
-        print "<p><table width=100% border=0 cellpadding=3 cellspacing=1>";
-        print "<tr class=listhead bgcolor=$BGCOLOR>";
+        print "<p><table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=3 cellspacing=1>";
+        print "<tr class='tableHeadForBGUp'>";
         print "<td rowspan=2></td>";
         print "<td rowspan=2>";
         print pacsone_gettext("Server Instances");
@@ -373,7 +373,7 @@ if ($type == 0) {
         $check = pacsone_gettext("Check All");
         $uncheck = pacsone_gettext("Uncheck All");
         print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"instances\", \"$check\", \"$uncheck\")'></td>\n";
-	    print "<td><input type=submit value='";
+	    print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete User From Selected Server Instances");
@@ -500,8 +500,8 @@ if ($addUser) {
         print "</td></tr>";
         // multi-instance privileges
         print "<tr><td colspan=3>";
-        print "<p><table width=100% border=0 cellpadding=3 cellspacing=1>";
-        print "<tr class=listhead bgcolor=$BGCOLOR>";
+        print "<p><table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=3 cellspacing=1>";
+        print "<tr class='tableHeadForBGUp' >";
         print "<td rowspan=2></td>";
         print "<td rowspan=2>";
         print pacsone_gettext("Server Instances");

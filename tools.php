@@ -87,6 +87,7 @@ class ImportPage extends TabbedPage {
         print pacsone_gettext("Import studies from a DICOM Part 10 formatted local directory:");
         print " </input>";
         print "<input type=text name='directory' size=64 maxlength=256 value='$importdir'></input><br>";
+        print "<div style='height:0px;'></div>\n";
         $checked = strlen($this->dest)? "checked" : "";
         print "<input type=radio name='type' value=1 $checked>";
         print pacsone_gettext("Import studies from Removable Media drive:") . " </input>";
@@ -100,6 +101,7 @@ class ImportPage extends TabbedPage {
         $value = strlen($this->drive)? $this->drive : $value;
         print "<input style='margin-left:113px;' type=text name='drive' size=$size maxlength=64 value='$value'></input>";
         print pacsone_gettext(" to destination archive directory:") . "<br>";
+        print "<div style='height:5px;'></div>\n";
         $value = strlen($this->dest)? $this->dest : "";
         print "<input style='margin-left:405px;' type=text name='destdir' size=64 maxlength=256 value='$value'></input><br>";
         print "<p>";
@@ -110,7 +112,7 @@ class ImportPage extends TabbedPage {
         print "<input type=radio name='all' value=0>";
         printf(pacsone_gettext("Select a list of %s to import"), $CUSTOMIZE_PATIENTS);
         print "</input><br>";
-        print "<br><input class='btn btn-primary' type=submit value='";
+        print "<br><input class='btn btn-primary' type=submit value='"; // ----------[import] --------
         print pacsone_gettext("Import Studies");
         print "' title='";
         print pacsone_gettext("Import External Studies");
@@ -144,8 +146,9 @@ class StatisticsPage extends TabbedPage {
         print pacsone_gettext("Report on studies received from:") . " </input>";
         $euro = $this->dbcon->isEuropeanDateFormat();
         $pattern = ($euro)? pacsone_gettext("DD-MM-YYYY") : pacsone_gettext("YYYY-MM-DD");
-        print "<input style='margin-left:100px;' type=text name='from'> ($pattern)</input>";
+        print "<input style='margin-left:100px;' type=text name='from'> ($pattern)&nbsp</input>";
         print "<input type=text name='to'> ($pattern)</input><br>";
+        print "<div style='height:5px;'></div>\n";
         print "<input type=radio name='type' value=5>";
         print pacsone_gettext("Report on studies received from this source AE:") . "</input>";
         print " <input style='margin-left:6px;' type=text name='sourceae'><br>";
@@ -375,7 +378,7 @@ class PatientReconciliationPage extends TabbedPage {
         require_once "checkUncheck.js";
         print "<form method='POST' action='patientReconciliation.php' enctype='multipart/form-data'>\n";
         print "<input type='hidden' name='actionvalue'>\n";
-        print "<p><table border=0 width=100% cellpadding=0 cellspacing=2>\n";
+        print "<p><table class='table table-hover table-bordered table-striped' border=0 width=100% cellpadding=0 cellspacing=2>\n";
         $columns = array(
             pacsone_gettext("When")                                             => "timestamp",
             $CUSTOMIZE_PATIENT_ID                                               => "patientid",
@@ -384,7 +387,7 @@ class PatientReconciliationPage extends TabbedPage {
             sprintf(pacsone_gettext("Original %s"), $CUSTOMIZE_PATIENT_NAME)    => "original",
             sprintf(pacsone_gettext("Modified %s"), $CUSTOMIZE_PATIENT_NAME)    => "modified",
         );
-        print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+        print "<tr class='tableHeadForBGUp'>\n";
         print "<td></td>";
         foreach ($columns as $key => $field) {
             print "<td><b>$key</b></td>";
@@ -395,7 +398,7 @@ class PatientReconciliationPage extends TabbedPage {
         while ($result && ($row = $result->fetch(PDO::FETCH_ASSOC))) {
             $uid = $row["studyuid"];
             $pid = $row["patientid"];
-            print "<tr>";
+            print "<tr style='background-color:white;'>";
 			print "<td><input type='checkbox' name='entry[]' value='$uid'</td>\n";
             foreach ($columns as $key => $field) {
                 if (strcasecmp($key, pacsone_gettext("Study ID")) == 0) {
@@ -419,7 +422,7 @@ class PatientReconciliationPage extends TabbedPage {
             $check = pacsone_gettext("Check All");
             $uncheck = pacsone_gettext("Uncheck All");
             print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'</td>\n";
-            print "<td><input type=submit name='action' value='";
+            print "<td><input class='btn btn-primary' type=submit name='action' value='";
             print pacsone_gettext("Delete");
             print "' onclick='switchText(this.form,\"actionvalue\",\"Delete\");return confirm(\"";
             print pacsone_gettext("Are you sure?");
@@ -567,7 +570,7 @@ class StorageFormatPage extends TabbedPage {
         print pacsone_gettext("Note: since the change of storage format will be applied to all Dicom images stored in the database, it may take quite some time as well as CPU/memory resources for the compression to be completed depending on the size of the existing database. ");
         print pacsone_gettext("So please run this tool only during <u>off-hours</u>, e.g., night or weekends, etc, in order to have minimum impact on the normal workflows during the regular business hours.");
         print "</b>";
-        print "<p><input type=submit name='action' value='";
+        print "<p><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Change Storage Format");
         print "' onclick='switchText(this.form,\"actionvalue\",\"Change Storage Format\")'>";
         print "</form>\n";

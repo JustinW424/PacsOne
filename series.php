@@ -65,7 +65,7 @@ if (!$viewAccess && !$dbcon->accessStudy($studyId, $username)) {
     exit();
 }
 $tagged = 0;
-$query = "SELECT * FROM series where studyuid=?";
+$query = "SELECT * FROM series where studyuid=?"; // series table list source 
 $bindList = array($studyId);
 $result = $dbcon->preparedStmt($query, $bindList);
 $rows = array();

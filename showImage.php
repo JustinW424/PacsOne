@@ -385,7 +385,7 @@ print "</table>\n";
 print "<form method=POST action='manipulate.php'>\n";
 $nocache = urlencode($nocache);
 print "<input type=hidden value=$nocache name='path'>\n";
-print "<input type=submit value='";
+print "<input class='btn btn-primary' type=submit value='";
 print pacsone_gettext("Online Image Processing");
 print "' title='";
 print pacsone_gettext("Online Image Processing");
@@ -403,7 +403,7 @@ if ($result && $result->rowCount() && ($email = $dbcon->getEmailAddress($usernam
     print "<input type=hidden name='studyid' value='$studyId'>";
     print "<input type=hidden name='patientid' value='$patientId'>";
     print "<input type=hidden name='patientname' value='$patientName'>";
-    print "<input type=submit value='";
+    print "<input class='btn btn-primary' type=submit value='";
     printf(pacsone_gettext("Email %s Image"), strtoupper(substr($file, -3)));
     print "'>&nbsp;";
     print pacsone_gettext("To:");

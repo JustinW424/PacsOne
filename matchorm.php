@@ -254,11 +254,11 @@ class MatchORMPage extends TabbedPage {
             print pacsone_gettext("There is no matching ORM message found.");
             print "</b></td></tr>";
         } else {
-            print "<tr><td><table width=100% border=0 class='mouseover radiorow'>\n";
+            print "<tr><td><table class='table table-hover table-bordered table-striped' width=100% border=0 class='mouseover radiorow'>\n";
             print "<th align=center colspan=$colspan><b>";
             print pacsone_gettext("ORM Messages Received:");
             print "</b></th>\n";
-            print "<tr class=listhead bgcolor=$BGCOLOR><td></td>\n";
+            print "<tr class='tableHeadForBGUp' ><td></td>\n";
             foreach ($columns as $key => $field) {
                 print "\t<td><b>" . $field[0] . "</b></td>\n";
             }
@@ -324,7 +324,7 @@ class MatchORMPage extends TabbedPage {
         if (isset($_POST['lastname']) && strlen($_POST['lastname']) && strlen($checked))
             $value = "value='" . $_POST['lastname'] . "'";
         print "<input type=text name='lastname' size=8 maxlength=16 $value><p>";
-        print "<input type=submit name='button' value='";
+        print "<input class='btn btn-primary' type=submit name='button' value='";
         print pacsone_gettext("Filter") . "'><br>";
         print "</td></tr>";
         print "</table></td>\n";
@@ -432,11 +432,11 @@ class MatchORMPage extends TabbedPage {
             print pacsone_gettext("There is no matching Dicom study found.");
             print "</b></td></tr>";
         } else {
-            print "<tr><td><table width=100% border=0 class='mouseover optionrow'>";
+            print "<tr><td><table class='table table-hover table-bordered table-striped' width=100% border=0 class='mouseover optionrow'>";
             print "<th align=center colspan=$colspan><b>";
             print pacsone_gettext("Dicom Studies Received");
             print "</b></th>\n";
-            print "<tr class=listhead bgcolor=$BGCOLOR><td></td>\n";
+            print "<tr class='tableHeadForBGUp'><td></td>\n";
             foreach ($columns as $key => $column) {
                 print "\t<td><b>" . $column[0] . "</b></td>\n";
             }
@@ -508,7 +508,7 @@ class MatchORMPage extends TabbedPage {
         $checked = $wildname? "checked" : "";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='checkbox' name='wildname' value=1 $checked>";
         print pacsone_gettext("Append wild-card character '<b>*</b>' to search pattern");
-        print "<p><input type=submit name='button' value='";
+        print "<p><input class='btn btn-primary' type=submit name='button' value='";
         print pacsone_gettext("Filter");
         print "'><br>";
         print "</table></td>\n";
@@ -542,7 +542,7 @@ class MatchORMPage extends TabbedPage {
                 }
                 print "</select>\n";
             }
-            print "<p><input type=submit name='button' value='";
+            print "<p><input class='btn btn-primary' type=submit name='button' value='";
             print pacsone_gettext("Match") . "' title='";
             print pacsone_gettext("Match selected ORM message with Dicom studies");
             print "'>";

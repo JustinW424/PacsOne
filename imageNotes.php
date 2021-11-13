@@ -538,7 +538,7 @@ function addEntryForm(&$username, &$patientId, &$studyUid, &$uid)
     }
     print "</b><p>";
     $mbytes = $maxupload / 1024 / 1024;
-    print "<input type=submit name='action' value='";
+    print "<input class='btn btn-primary' type=submit name='action' value='";
     print pacsone_gettext("Attach");
     print "' onclick='switchText(this.form,\"imagenoteaction\",\"Attach\")' $disabled> ";
     printf(pacsone_gettext("(max %d Mb)"), $mbytes);
@@ -557,7 +557,7 @@ function addEntryForm(&$username, &$patientId, &$studyUid, &$uid)
                 print "<img src='attachment.gif' border=0>";
                 print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
             }
-            print "<br><input type=submit name='action' value='";
+            print "<br><input class='btn btn-primary' type=submit name='action' value='";
             print pacsone_gettext("Unattach");
             print "' onclick='switchText(this.form,\"imagenoteaction\",\"Unattach\")'>\n";
             if ($pdf) {
@@ -670,7 +670,7 @@ function modifyEntryForm(&$username, &$patientId, &$studyUid, &$uid)
     }
     print "</b><p>";
     $mbytes = $maxupload / 1024 / 1024;
-    print "<input type=submit name='action' value='";
+    print "<input class='btn btn-primary' type=submit name='action' value='";
     print pacsone_gettext("Attach");
     print "' onclick='switchText(this.form,\"imagenoteaction\",\"Attach\")' $disabled> ";
     printf(pacsone_gettext("(max %d Mb)"), $mbytes);
@@ -687,7 +687,7 @@ function modifyEntryForm(&$username, &$patientId, &$studyUid, &$uid)
             print "<img src='attachment.gif' border=0>";
             print "<b>" . $att['name'] . "</b> (" . $att['size'] . " bytes)<br>\n";
         }
-        print "<br><input type=submit name='action' value='";
+        print "<br><input class='btn btn-primary' type=submit name='action' value='";
         print pacsone_gettext("Unattach");
         print "' onclick='switchText(this.form,\"imagenoteaction\",\"Unattach\")'>\n";
     }
@@ -806,13 +806,13 @@ function viewNotesForm(&$username, &$patientId, &$studyUid, &$uid)
         $uncheck = pacsone_gettext("Uncheck All");
         print "<td><input type=button value='$check' name='checkUncheck' onClick='checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'>&nbsp;\n";
     }
-    print "<input type=submit value='";
+    print "<input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Add");
     print "' name='action' title='";
     print pacsone_gettext("Add New Image Note");
     print "' onclick='switchText(this.form,\"imagenoteaction\",\"Add\")'>&nbsp;\n";
     if ($count && $modify) {
-        print "<input type=submit value='";
+        print "<input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete Selected Image Notes");
@@ -821,7 +821,7 @@ function viewNotesForm(&$username, &$patientId, &$studyUid, &$uid)
         print "\");'>&nbsp;\n";
     }
     if ($count && $download) {
-        print "<input type=submit value='";
+        print "<input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Download");
         print "' name='action' title='";
         print pacsone_gettext("Download Selected Image Notes");
@@ -838,7 +838,7 @@ function viewNotesForm(&$username, &$patientId, &$studyUid, &$uid)
         if ($result && $result->rowCount()) {
             print "<input type=hidden name='imagefile' value='$imagefile'>";
             print "<tr><td>";
-            print "<input type=submit value='";
+            print "<input class='btn btn-primary' type=submit value='";
             print pacsone_gettext("Email Image Notes To");
             print "' name='action' title='";
             print pacsone_gettext("Email Selected Image Notes To Specified Email Address (es)");

@@ -103,8 +103,8 @@ $columns = array(
 	"Observation Date & Time"		=> array(pacsone_gettext("Observation Date & Time"), "observationdatetime"),
 );
 print "<tr><td>\n";
-print "<table width=100% border=0 cellpadding=5>\n";
-print "<tr class=listhead bgcolor=$BGCOLOR>\n";
+print "<table class='table table-hover table-bordered table-striped' width=100% border=0 cellpadding=5>\n";
+print "<tr class='tableHeadForBGUp'>\n";
 if ($checkbox) {
     print "\t<td></td>\n";
 }
@@ -114,7 +114,7 @@ foreach ($columns as $key => $field) {
 print "</tr>\n";
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     $uid = $row['uuid'];
-    print "<tr>\n";
+    print "<tr style='background-color:white;'>\n";
     if ($checkbox) {
         print "\t<td valign=center align=center width='1%'>\n";
         $data = $row['uuid'];
@@ -150,7 +150,7 @@ if ($checkbox) {
     print "<tr>\n";
     print "<td><input type=button value='$check' onClick='this.value=checkAll(this.form,\"entry\", \"$check\", \"$uncheck\")'</td>\n";
 	if ($access) {
-    	print "<td><input type=submit value='";
+    	print "<td><input class='btn btn-primary' type=submit value='";
         print pacsone_gettext("Delete");
         print "' name='action' title='";
         print pacsone_gettext("Delete checked reports");

@@ -126,7 +126,7 @@ if (isset($_POST['option'])) {
     print "</table>\n";
     print "<p><table width=20% border=0 cellpadding=5>\n";
     print "<tr>\n";
-    print "<td><input type=submit value='";
+    print "<td><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Export");
     print "' name='action' title='";
     printf(pacsone_gettext("Export %s"), $level);

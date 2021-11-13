@@ -33,6 +33,9 @@ if ($type == 1) {
         exit();
     }
 }
+
+//print "dir1 = ".$directory."\n";
+
 $directory = strtr($directory, "\\", "/");
 $drive = strtr($drive, "\\", "/");
 if ($directory[strlen($directory)-1] != '/')
@@ -50,6 +53,9 @@ if (!file_exists($dicomdir)) {
 } else {
     if (version_compare(PHP_VERSION, '7.0.0') < 0)
         set_magic_quotes_runtime(0);
+
+    //print "type=".$type."  srcDir= ". $dicomdir. "\n";
+
 	$handle = fopen($dicomdir, "rb");
 	$data = fread($handle, 132);
     $data = substr($data, 128);
@@ -76,13 +82,24 @@ if ($dbcon->useOracle) {
 }
 $query .= "'submitted',?)";
 $bindList[] = $directory;
+
+//print "query = ". $query. "\n";
+//print "bindListA\n";
+//print_r($bindList);
+//print "\nbindListB";
+
+
 if (!$dbcon->preparedStmt($query, $bindList)) {
+
+    //print "\nimport fail\n";
     print "<p><font color=red>";
     printf(pacsone_gettext("Error: Failed to schedule database job for importing studies from <b>%s</b>.<br>"), $directory);
     print pacsone_gettext("Database Error: ") . $dbcon->getError() . "</font></p>";
 } else {
+    //print "\nimport ok\n";
 	$id = $dbcon->insert_id("dbjob");
     $url = $all? "status.php" : "importScan.php?jobid=$id";
+    //print " import-URL".$url."\n";
 	printf(pacsone_gettext("Job: [<b><a href='$url'>%d</a></b>] has been scheduled to %s studies from: <b>%s</b>.<br>"), $id, ($all? "scan" : "import"), ($type == 1)? $drive : $directory);
     // log activity to system journal
     $dbcon->logJournal($username, "Import", $title, $directory);

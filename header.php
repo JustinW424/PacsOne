@@ -197,6 +197,7 @@ print "<div style=\"width:100%;\">\n";
                 print "</div>\n";
             print "</td>\n";
             print "<td>\n";
+            print "<div style='height:10px;'></div>\n";
                AddLogOut($database, $username);
             print "</td>\n";
             print "</tr>\n";

@@ -80,7 +80,7 @@ print "<input type=text name='fromtime'>";
 print pacsone_gettext(" (HH:MM 24-Hour Clock Format)") . "   </input>\n";
 print "To: <input type=text name='totime'>";
 print pacsone_gettext(" (HH:MM 24-Hour Clock Format)") . "</input></P>\n";
-print "<input type=submit value='";
+print "<input class='btn btn-primary' type=submit value='";
 print pacsone_gettext("Find Modality Worklist");
 print "'>\n";
 print "</form>\n";

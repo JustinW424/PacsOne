@@ -50,7 +50,7 @@ function login($errorMessage)
     printf(pacsone_gettext("Create Database Password for %s:"), $PRODUCT) . "</td>\n";
 	print "<td><input type=password size=16 maxlength=16 name='dbpasswd'></td></tr>\n";
     print "</table>\n";
-    print "<p><input type=submit value='";
+    print "<p><input class='btn btn-primary' type=submit value='";
     print pacsone_gettext("Setup");
     print "'></form>\n";
 	print "<p><b>";

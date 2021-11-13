@@ -43,7 +43,8 @@ class SearchPatientPage extends TabbedPage {
             print "<input type='text' name='firstname'>\n";
             print "<input type='checkbox' name='wildname' value=1 checked>";
             print pacsone_gettext("Append wild-card character '<b>*</b>' to search pattern");
-            print "<br>\n";
+            //print "<br>\n";
+            print "<div style='height:0px;'></div>\n";
             print pacsone_gettext("Full Name Search (ignore order of first, middle and last names):");
             print "<input type='text' name='fullname' size=64 maxlength=128>\n";
         }
