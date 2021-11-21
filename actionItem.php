@@ -21,13 +21,16 @@ global $STUDY_STATUS_DEFAULT;
 global $CUSTOMIZE_PATIENT;
 $dbcon = new MyConnection();
 $username = $dbcon->username;
-$action = $_POST['action'];
+
+if(isset($_POST['action']))
+    $action = $_POST['action'];
 
 if (isset($_POST['actionvalue']))
     $action = $_POST['actionvalue'];
 
 if(isset($_POST['option']))
     $option = $_POST['option'];
+
 
 
 if (stristr($action, "Clear Filters") || stristr($action, "Apply Filters")) {
@@ -809,9 +812,7 @@ if (strcasecmp($action, "Change Storage") == 0 && isset($option)) {
         print "&nbsp;$uid<br>\n";
     }
     print "</td></tr>";
-
     print "<tr><td>";
-   // print "<div style='height:10px;'></div>\n";
     print pacsone_gettext("Please select new storage location:");
     print "</td><td>";
      print "<div style='height:10px;'></div>\n";
@@ -822,7 +823,6 @@ if (strcasecmp($action, "Change Storage") == 0 && isset($option)) {
         print "<option>$value</option>";
     }
     print "</select>\n";
-
     print "<br><input type='radio' name='userdir' value=1>";
     print pacsone_gettext("Move to this specific directory:");
     print "&nbsp;<input type='text' name='newdir' size=64 maxlength=255>";

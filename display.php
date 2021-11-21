@@ -255,7 +255,7 @@ function buildStartBtnGroupAnimation(){
           print "clearInterval(IntervalFuncHandle);\n";
           print "return;\n";
        print "}\n";
-       print "numpos += 10;\n";
+       print "numpos += 20;\n";
        print "$(\"#btnGroupID\").css(\"margin-left\", numpos+\"px\");\n";
     print "}\n";
 
@@ -264,12 +264,12 @@ function buildStartBtnGroupAnimation(){
        print "var pos = $(\"#btnGroupID\").css(\"margin-left\");\n";
        print "var len = pos.length;\n";
        print "var numpos = Number(pos.substring(0, len-2));\n";
-       print "if(numpos < -1000)\n";
+       print "if(numpos < -2000)\n";
        print "{\n";
           print "clearInterval(IntervalFuncHandle);\n";
           print "return;\n";
        print "}\n";
-       print "numpos -= 10;\n";
+       print "numpos -= 20;\n";
        print "$(\"#btnGroupID\").css(\"margin-left\", numpos+\"px\");\n";
     print "}\n";
 
@@ -287,7 +287,7 @@ function buildStartBtnGroupAnimation(){
     print "}\n";
     print "else\n";
     print "{\n";
-       //$("#btnGroupID").css("margin-left", "-1000px");
+       //$("#btnGroupID").css("margin-left", "-2000px");
        print "IntervalFuncHandle = setInterval(function(){ Hiding(); }, 1);\n";
     print "}\n";
     print "}\n";
@@ -314,7 +314,7 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
             
             print "<td style='width:62%'>\n";
 
-            print "<div id=\"btnGroupID\" class=\"btn-group\" style=\"margin-left:-1000px;\">\n";
+            print "<div id=\"btnGroupID\" class=\"btn-group\" style=\"margin-left:-2000px;\">\n";
 
             buildStartBtnGroupAnimation();
     }else{
@@ -354,11 +354,25 @@ function displayButtons($level, &$buttons, $hidden, $checkButton = 1, $paginatio
                 $handler = "toggleFilter(this.form, \"$show\", \"$hide\");return false;";
             } else if (stristr($key, "Download") || stristr($key, "Delete")) {
                 require_once "ajaxLoader.js";
+
+                $className = "";
+                $classNameSub = "";
+
                 if (stristr($key, "Download"))
-                    $className = strcasecmp($key, "Download")? "ajaxbuttonJPG" : "ajaxbuttonDicom";
+                    $classNameSub = strcasecmp($key, "Download")? "ajaxbuttonJPG" : "ajaxbuttonDicom";
                 else
-                    $className = "ajaxbuttonDelete";
-                $line = "<input type=\"button\" class=\"btn dicomButtonBG\" value='$text' title='$title' class='$className' ";
+                    $classNameSub = "ajaxbuttonDelete";
+
+                //print "displayButton:".$key."\n";
+                
+                $className = "btn dicomButtonBG ". $classNameSub;
+                
+                //print "className=".$className."\n";
+
+                //$line = "<input type=\"button\" class=\"btn dicomButtonBG\" value='$text' title='$title' class='$className' ";
+                
+                $line = "<input type=\"submit\" value='$text' title='$title' class='$className' ";
+
                 $ajaxButton = true;
             }
             $line .= "onclick='$handler'>\n";
